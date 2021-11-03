@@ -462,10 +462,10 @@ if (!singleLock) {
     localShortcut.register("Ctrl+O", () => {
       window?.webContents.send("upload")
     }, window, {strict: true})
+    globalShortcut.register("Control+Shift+I", () => {
+      window?.webContents.toggleDevTools()
+    })
     if (process.env.DEVELOPMENT === "true") {
-      globalShortcut.register("Control+Shift+I", () => {
-        window?.webContents.toggleDevTools()
-      })
     }
   })
 }

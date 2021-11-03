@@ -42,10 +42,11 @@
     },
     "files": [
       "dist/**/*",
+      "vendor/**/*",
       "package.json"
     ],
     "asarUnpack": [
-      "**/app/vendor/*"
+      "vendor/**/*"
     ],
     "publish": {
       "provider": "github",
