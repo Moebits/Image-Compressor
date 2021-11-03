@@ -44,11 +44,9 @@
       "dist/**/*",
       "package.json"
     ],
-    "asar": {
-      "asarUnpack": [
-        "vendor/**/*"
-      ]
-    },
+    "asarUnpack": [
+      "**/app/vendor/*"
+    ],
     "publish": {
       "provider": "github",
       "repo": "Image-Compressor",
@@ -74,7 +72,7 @@
     "css-loader": "^5.0.1",
     "del-cli": "^3.0.1",
     "electron": "^11.2.1",
-    "electron-builder": "^22.9.1",
+    "electron-builder": "^22.13.1",
     "file-loader": "^6.2.0",
     "fork-ts-checker-webpack-plugin": "^6.1.0",
     "html-loader": "^1.3.2",
