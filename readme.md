@@ -16,12 +16,12 @@ Note: Quality only affects JPG/WEBP export, PNG and GIF compression are automati
 ### Rename Template:
 You can customize the output names. If it results in a blank name (eg. not found) it will default to using the same name as the input. If the "Overwrite" option is on, the original file is overwritten with the compressed file first and then renamed after. These are all the special replacements:
 
-{name} - The name of the original file.
-{title} - The title of the Pixiv illustration, if found.
-{englishTitle} - The title, but translated to English.
-{id} - The Pixiv ID of the illustration, if found.
-{artist} - The artist of the illustration, if found.
-{width} - The destination width.
+{name} - The name of the original file. \
+{title} - The title of the Pixiv illustration, if found. \
+{englishTitle} - The title, but translated to English. \
+{id} - The Pixiv ID of the illustration, if found. \
+{artist} - The artist of the illustration, if found. \
+{width} - The destination width. \
 {height} - The destination height.
 
 ### Keyboard Shortcuts
