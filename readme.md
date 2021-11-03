@@ -1,6 +1,6 @@
 ## Image Compressor
 
-<img src="assets/images/readme">
+<img src="assets/images/readme.png">
 
 This is a bulk image compressor, resizer, and renamer. Great for organizing your anime art collection. You can reduce the size of images/GIFs, delete duplicate images, and rename pictures according to the source (from saucenao).
 
