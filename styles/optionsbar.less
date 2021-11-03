@@ -1,0 +1,204 @@
+@import "../index.less";
+
+.options-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 7px;
+    width: 100%;
+}
+
+.options-bar-row {
+    margin-top: 10px;
+    margin-left: 55px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+}
+
+.options-bar-box {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-evenly;
+    margin-right: 35px;
+}
+
+.options-bar-text {
+    color: var(--text-color);
+    font-size: 23px;
+    font-family: "Maven Pro", sans-serif;
+    cursor: text;
+    user-select: text;
+}
+
+.options-bar-input {
+    margin-left: 6px;
+    color: var(--text-color);
+    font-size: 23px;
+    font-family: "Maven Pro", sans-serif;
+    height: 30px;
+    width: 50px;
+    border: none;
+    background-color: transparent;
+    &:focus {
+        outline: none;
+    }
+    &:first-child {
+        width: 20px;
+    }
+}
+
+.wide {
+    width: 100px;
+}
+
+.options-bar-checkbox {
+    border: none;
+    cursor: pointer;
+    transform: scale(1.5);
+    filter: hue-rotate(130deg);
+    margin-right: 10px;
+}
+
+.btn {
+    color: black;
+    font-size: 17px;
+    font-family: "Maven Pro", sans-serif;
+    padding: 1px 3px;
+    background-color: #ee3453;
+    border-color: transparent;
+    margin-left: 10px;
+    margin-right: 10px;
+    &:hover {
+        border-color: transparent;
+        background-color: #f04460;
+    }
+    &:focus {
+        color: black !important;
+        border-color: transparent !important;
+        background-color: #f54150 !important;
+        box-shadow: none !important;
+    }
+}
+
+.dropdown-toggle {
+    color: black !important;
+    border-color: transparent !important;
+    background-color: #fc4160 !important;
+    &:hover {
+        color: white !important;
+    }
+    &::after {
+        content: none !important; 
+    }
+}
+
+.dropdown-menu {
+    background-color: #f73152;
+    min-width: 0;
+    padding: 0;
+    border: none;
+}
+
+.dropdown-item {
+    color: black;
+    font-size: 15px;
+    font-family: "Maven Pro", sans-serif;
+    padding: 3px 2px;
+    &:hover {
+        background-color: #f8939b;
+    }
+}
+
+.dropdown-item.active, .dropdown-item:active {
+    background-color: #ee505d;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.default-button {
+    border: none;
+    font-family: "Skranji", sans-serif;
+    font-size: 1.5rem;
+    color: white;
+    margin-right: 35px;
+    padding-left: 0.6rem;
+    padding-right: 0.6rem;
+    span:hover {
+        cursor: pointer;
+        color: black;
+    }
+}
+
+.upload-button {
+    .default-button();
+    background-color: #ff3a42;
+}
+
+.options-slider.rc-slider {
+    margin-left: 15px;
+    margin-right: 15px;
+    width: 40%;
+    border-radius: 0.2;
+    align-items: center;
+}
+
+.options-slider > .rc-slider-rail {
+    height: 0.4rem;
+    background-color: black;
+    border-radius: 0.2;
+}
+
+.options-slider > .rc-slider-track {
+    height: 0.4rem;
+    background-color: #fa4160;
+    border-radius: 0.2;
+}
+
+.options-slider > .rc-slider-handle {
+    margin-top: -7px;
+    border: none;
+    height: 1.3rem;
+    width: 1.3rem;
+    &:active {
+        box-shadow: none;
+        filter: hue-rotate(-30deg);
+    }
+    &:hover {
+        filter: hue-rotate(-30deg);
+    }
+}
+
+.options-slider > .rc-slider-handle {
+    content: url("../assets/icons/volume-thumb.png");
+    background-color: black;
+}
+
+.rc-slider-handle-dragging.rc-slider-handle-dragging.rc-slider-handle-dragging {
+    box-shadow: none;
+}
+
+.download-location {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-right: 35px;
+    margin-top: 8px;
+}
+
+.download-location-text {
+    color: var(--text-color);
+    user-select: text;
+    font-family: "Fira Sans", sans-serif;
+    font-size: 18px;
+    margin-left: 5px;
+}
+
+.download-location-img {
+    cursor: pointer;
+}
