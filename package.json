@@ -44,9 +44,6 @@
       "dist/**/*",
       "package.json"
     ],
-    "extraFiles": [
-      "vendor/**/*"
-    ],
     "publish": {
       "provider": "github",
       "repo": "Image-Compressor",
@@ -67,6 +64,7 @@
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@types/sharp": "^0.29.3",
+    "copy-webpack-plugin": "^9.0.1",
     "cross-env": "^7.0.3",
     "css-loader": "^5.0.1",
     "del-cli": "^3.0.1",
