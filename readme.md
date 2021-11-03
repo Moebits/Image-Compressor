@@ -39,5 +39,5 @@ Open an issue on my GitHub repository.
 ### Also See
 
 - [Waifu2x GUI](https://github.com/Tenpi/Waifu2x-GUI) for upscaling images
-- [Pixiv Downloader](https://github.com/Tenpi/Pixiv-Downloader)
-- [Photo Viewer](https://github.com/Tenpi/Photo-Viewer)
+- [Pixiv Downloader](https://github.com/Tenpi/Pixiv-Downloader) for downloading images
+- [Photo Viewer](https://github.com/Tenpi/Photo-Viewer) for editing images
