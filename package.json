@@ -42,8 +42,10 @@
     },
     "files": [
       "dist/**/*",
-      "vendor/**/*",
       "package.json"
+    ],
+    "extraResources": [
+      "vendor/**/*"
     ],
     "publish": {
       "provider": "github",
