@@ -44,7 +44,7 @@
       "dist/**/*",
       "package.json"
     ],
-    "extraResources": [
+    "asarUnpack": [
       "vendor/**/*"
     ],
     "publish": {
