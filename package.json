@@ -44,9 +44,11 @@
       "dist/**/*",
       "package.json"
     ],
-    "asarUnpack": [
-      "vendor/*"
-    ],
+    "asar": {
+      "asarUnpack": [
+        "vendor/**/*"
+      ]
+    },
     "publish": {
       "provider": "github",
       "repo": "Image-Compressor",
