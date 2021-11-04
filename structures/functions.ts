@@ -232,4 +232,18 @@ export default class Functions {
         }
         return {frameArray, delayArray}
     }
+
+    public static arrayBufferToBuffer(arrayBuffer: ArrayBuffer) {
+        const buffer = Buffer.alloc(arrayBuffer.byteLength)
+        const array = new Uint8Array(arrayBuffer)
+        for (let i = 0; i < buffer.length; i++) {
+            buffer[i] = array[i]
+        }
+        return buffer
+    }
+
+    public static bufferToBase64 = (buffer: Buffer, type: string) => {
+        console.log(buffer)
+        return `data:${type};base64,${buffer.toString("base64")}`
+    }
 }

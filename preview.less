@@ -1,0 +1,112 @@
+@import url("https://fonts.googleapis.com/css2?family=Maven+Pro:wght@700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Yusei+Magic&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Skranji&display=swap");
+
+@title-bar-height: 30px;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    background: repeating-conic-gradient(#131313 0% 25%, #181818 0% 50%) 50% / 10px 10px
+}
+
+#root {
+    width: 100%;
+    height: 100%;
+}
+
+.app {
+    width: 100%;
+    height: 100%;
+}
+
+#webview {
+    width: 100%;
+    height: 100%;
+    padding-top: @title-bar-height;
+}
+
+::selection {
+    background-color: #ffb5cb;
+    color: white;
+}
+
+::-webkit-scrollbar {
+    width: 20px;
+}
+  
+::-webkit-scrollbar-track {
+    background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #5a5a5a;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #303030;
+}
+
+.preview-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: calc(100vh - @title-bar-height);
+    position: absolute;
+    bottom: 0;
+}
+
+.preview {
+    width: max-content;
+    height: max-content;
+}
+
+.image {
+    width: auto;
+    height: auto;
+    max-width: calc(100vw - 120px);
+    max-height: calc(100vh - @title-bar-height * 2);
+}
+
+.react-transform-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.react-transform-component {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.preview-text {
+    margin-right: 10px;
+    width: 100px;
+    color: #f55195;
+    font-size: 15px;
+    font-family: "Maven Pro", sans-serif;
+    position: absolute;
+    right: 0;
+    bottom: 2%;
+    text-shadow: 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black,0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black,0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black,0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black;
+}
+
+.preview-text2 {
+    margin-left: 10px;
+    width: 100px;
+    color: #f55195;
+    font-size: 15px;
+    font-family: "Maven Pro", sans-serif;
+    position: absolute;
+    left: 0;
+    bottom: 2%;
+    text-shadow: 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black,0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black,0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black,0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black;
+}

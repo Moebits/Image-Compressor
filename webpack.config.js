@@ -33,6 +33,30 @@ module.exports = [
     devServer: {contentBase: path.join(__dirname, "./dist"), port: 9000, compress: true, hot: true, historyApiFallback: true, publicPath: "/"},
   },
   {
+    target: "electron-renderer",
+    entry: "./preview",
+    mode: "production",
+    node: {__dirname: false},
+    output: {filename: "preview.js", path: path.resolve(__dirname, "./dist"), publicPath: "./"},
+    resolve: {extensions: [".js", ".jsx", ".ts", ".tsx"], mainFields: ["main", "module", "browser"], alias: {"react-dom$": "react-dom/profiling", "scheduler/tracing": "scheduler/tracing-profiling"}},
+    optimization: {minimize: true, minimizer: [new TerserJSPlugin({extractComments: false})], moduleIds: "named"},
+    module: {
+      rules: [
+        {test: /\.(jpe?g|png|gif|svg|mp3|wav|mp4|yml|txt)$/, exclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
+        {test: /\.html$/, exclude, use: [{loader: "html-loader", options: {minimize: false}}]},
+        {test: /\.less$/, exclude, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader", "less-loader"]},
+        {test: /\.css$/, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader"]},
+        {test: /\.(tsx?|jsx?)$/, exclude, use: [{loader: "ts-loader", options: {transpileOnly: true}}]}
+      ]
+    },
+    plugins: [
+      new ForkTsCheckerWebpackPlugin(),
+      new HtmlWebpackPlugin({filename: "preview.html", template: path.resolve(__dirname, "./preview.html"), minify: true}),
+      new MiniCssExtractPlugin({filename: "preview.css", chunkFilename: "preview.css"}),
+      new webpack.DefinePlugin({"process.env.FLUENTFFMPEG_COV": false})
+    ]
+  },
+  {
     target: "electron-main",
     entry: "./main",
     mode: "production",

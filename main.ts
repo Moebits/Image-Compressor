@@ -20,12 +20,43 @@ import sharp from "sharp"
 
 process.setMaxListeners(0)
 let window: Electron.BrowserWindow | null
+let preview: Electron.BrowserWindow | null
 autoUpdater.autoDownload = false
 const store = new Store()
 
 const history: Array<{id: number, source: string, dest?: string}> = []
 const active: Array<{id: number, source: string, dest: string, action: null | "stop"}> = []
 const queue: Array<{started: boolean, info: any}> = []
+
+ipcMain.handle("zoom-out", () => {
+  preview?.webContents.send("zoom-out")
+})
+
+ipcMain.handle("zoom-in", () => {
+  preview?.webContents.send("zoom-in")
+})
+
+const openPreview = async () => {
+  if (!preview) {
+    preview = new BrowserWindow({width: 800, height: 600, minWidth: 720, minHeight: 450, frame: false, backgroundColor: "#181818", center: false, webPreferences: {nodeIntegration: true, contextIsolation: false, enableRemoteModule: true}})
+    await preview.loadFile(path.join(__dirname, "preview.html"))
+    preview?.on("closed", () => {
+      preview = null
+    })
+  } else {
+    if (preview.isMinimized()) preview.restore()
+    preview.focus()
+  }
+}
+
+ipcMain.handle("preview-realtime", async (event, info: any) => {
+  preview?.webContents.send("update-buffer-realtime", info)
+})
+
+ipcMain.handle("preview", async (event, info: any) => {
+  await openPreview()
+  preview?.webContents.send("update-buffer", info)
+})
 
 ipcMain.handle("on-drop", async (event, files: any) => {
   window?.webContents.send("on-drop", files)
@@ -455,6 +486,9 @@ if (!singleLock) {
     window = new BrowserWindow({width: 800, height: 600, minWidth: 720, minHeight: 450, frame: false, backgroundColor: "#e14952", center: true, webPreferences: {nodeIntegration: true, contextIsolation: false, enableRemoteModule: true}})
     window.loadFile(path.join(__dirname, "index.html"))
     window.removeMenu()
+    window.on("close", () => {
+      preview?.close()
+    })
     window.on("closed", () => {
       window = null
     })
@@ -464,6 +498,7 @@ if (!singleLock) {
     if (process.env.DEVELOPMENT === "true") {
       globalShortcut.register("Control+Shift+I", () => {
         window?.webContents.toggleDevTools()
+        preview?.webContents.toggleDevTools()
       })
     }
   })

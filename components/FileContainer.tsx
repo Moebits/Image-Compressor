@@ -59,7 +59,7 @@ const FileContainer: React.FunctionComponent<FileContainerProps> = (props: FileC
     const [clearSignal, setClearSignal] = useState(false)
     const [drag, setDrag] = useState(false)
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const [newBuffer, setNewBuffer] = useState(null)
+    const [newBuffer, setNewBuffer] = useState(null as unknown as Buffer)
     const [newFileSize, setNewFileSize] = useState("0KB")
     const [newDimension, setNewDimension] = useState(`${props.width}x${props.height}`)
     const progressBarRef = useRef(null) as React.RefObject<HTMLDivElement>
@@ -72,7 +72,7 @@ const FileContainer: React.FunctionComponent<FileContainerProps> = (props: FileC
                 props.setStart(props.id)
             }
         }
-        const conversionFinished = (event: any, info: {id: number, output: string, skipped: boolean, buffer?: any, fileSize?: number}) => {
+        const conversionFinished = (event: any, info: {id: number, output: string, skipped: boolean, buffer?: Buffer, fileSize?: number}) => {
             if (info.id === props.id) {
                 setOutput(info.output)
                 if (info.skipped) setSkipped(info.skipped)
@@ -126,6 +126,8 @@ const FileContainer: React.FunctionComponent<FileContainerProps> = (props: FileC
         const {buffer, fileSize} = await ipcRenderer.invoke("compress-realtime", {id: props.id, source: props.source, dest: directory, fileSize: props.fileSize, width: props.width, height: props.height, quality, overwrite, ignoreBelow, resizeWidth, resizeHeight, percentage, keepRatio, rename, format})
         setNewBuffer(buffer)
         setNewFileSize(functions.readableFileSize(fileSize))
+        const type = format === "original" ? path.extname(props.source).replaceAll(".", "") : format
+        ipcRenderer.invoke("preview-realtime", {id: props.id, newSource: functions.bufferToBase64(functions.arrayBufferToBuffer(buffer), type), newFileSize: functions.readableFileSize(fileSize)})
         await functions.timeout(5000)
     }
 
@@ -282,11 +284,21 @@ const FileContainer: React.FunctionComponent<FileContainerProps> = (props: FileC
         }
     }
 
+    const preview = (event: React.MouseEvent<HTMLElement>) => {
+        const title = output ? functions.cleanTitle(path.basename(output)) : functions.cleanTitle(path.basename(props.source))
+        const type = format === "original" ? path.extname(props.source).replaceAll(".", "") : format
+        if (event.button === 2) ipcRenderer.invoke("preview", {id: props.id, title, source: props.source, fileSize: props.fileSize, newSource: functions.bufferToBase64(functions.arrayBufferToBuffer(newBuffer), type), newFileSize})
+    }
+
+    const delayPress = (event: React.MouseEvent<HTMLElement>) => {
+        if (event.button === 2) return event.stopPropagation()
+    }
+
     return (
         <section ref={fileContainerRef} className="file-wrap-container" onMouseOver={() => setHover(true)} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
             <div className="file-container" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onMouseDown={() => setDrag(false)} onMouseMove={() => setDrag(true)}>
             <div className="file-img-container">
-                <img className="file-img" src={output ? output : props.source}/>
+                <img className="file-img" onMouseDown={delayPress} onMouseUp={preview} src={output ? output : props.source}/>
             </div>
             <div className="file-middle">
                 <div className="file-group-top">
