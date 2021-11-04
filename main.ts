@@ -216,8 +216,7 @@ const compress = async (info: any) => {
       fs.renameSync(info.source, dest)
     }
     output = dest
-  } catch (e) {
-    console.log(e)
+  } catch {
     window?.webContents.send("conversion-finished", {id: info.id, output: info.source, skipped: true})
     return nextQueue(info)
   }
@@ -462,10 +461,10 @@ if (!singleLock) {
     localShortcut.register("Ctrl+O", () => {
       window?.webContents.send("upload")
     }, window, {strict: true})
-    globalShortcut.register("Control+Shift+I", () => {
-      window?.webContents.toggleDevTools()
-    })
     if (process.env.DEVELOPMENT === "true") {
+      globalShortcut.register("Control+Shift+I", () => {
+        window?.webContents.toggleDevTools()
+      })
     }
   })
 }

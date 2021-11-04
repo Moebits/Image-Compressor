@@ -45,9 +45,7 @@
       "vendor/**/*",
       "package.json"
     ],
-    "asarUnpack": [
-      "vendor/**/*"
-    ],
+    "asar": false,
     "publish": {
       "provider": "github",
       "repo": "Image-Compressor",
@@ -102,8 +100,6 @@
     "imagemin": "github:tenpi/imagemin#fix2",
     "imagemin-gifsicle": "^7.0.0",
     "imagemin-mozjpeg": "^9.0.0",
-    "imagemin-optipng": "^8.0.0",
-    "imagemin-pngcrush": "^7.0.0",
     "imagemin-pngquant": "^9.0.2",
     "imagemin-webp": "^6.0.0",
     "rc-slider": "^9.7.4",

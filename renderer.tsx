@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css"
 import {ipcRenderer} from "electron"
-import React, {useState} from "react"
+import React, {useState, useEffect} from "react"
 import {useDropzone} from "react-dropzone"
 import ReactDom from "react-dom"
 import LogoBar from "./components/LogoBar"
