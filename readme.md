@@ -10,7 +10,7 @@ This is a bulk image compressor, resizer, and renamer. Great for organizing your
 - Delete duplicate images (the one with the greatest dimensions is retained)
 - Choose to overwrite images or write to a folder
 - Ignore images under a certain file size (to avoid over-compression)
-- Preview before and after images
+- Preview before and after images (right click on the thumbnails)
 
 Note: Quality only affects JPG/WEBP export, PNG and GIF compression are automatic.
 

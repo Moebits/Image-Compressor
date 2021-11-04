@@ -63,8 +63,12 @@ ipcMain.handle("on-drop", async (event, files: any) => {
 })
 
 const getDimensions = (path: string) => {
-  const dimensions = imageSize(path)
-  return {width: dimensions.width ?? 0, height: dimensions.height ?? 0}
+  try {
+    const dimensions = imageSize(path)
+    return {width: dimensions.width ?? 0, height: dimensions.height ?? 0}
+  } catch {
+    return {width: 0, height: 0}
+  }
 }
 
 ipcMain.handle("get-dimensions", async (event, path: string) => {
@@ -76,19 +80,23 @@ ipcMain.handle("delete-duplicates", async () => {
   for (let i = 0; i < history.length; i++) {
     const source = history[i].source
     if (fs.existsSync(source)) {
-      const hash = await phash(fs.readFileSync(source))
-      let dupeArray = []
-      let found = false
-      hashMap.forEach((value, key) => {
-        if (dist(key, hash) < 5) {
-          dupeArray = functions.removeDuplicates([...value, source])
-          hashMap.set(key, dupeArray)
-          found = true
+      try {
+        const hash = await phash(fs.readFileSync(source))
+        let dupeArray = []
+        let found = false
+        hashMap.forEach((value, key) => {
+          if (dist(key, hash) < 5) {
+            dupeArray = functions.removeDuplicates([...value, source])
+            hashMap.set(key, dupeArray)
+            found = true
+          }
+        })
+        if (!found) {
+          dupeArray = [source]
+          hashMap.set(hash, dupeArray)
         }
-      })
-      if (!found) {
-        dupeArray = [source]
-        hashMap.set(hash, dupeArray)
+      } catch {
+        continue
       }
     }
   }
@@ -166,7 +174,7 @@ const nextQueue = async (info: any) => {
   let qIndex = queue.findIndex((q) => q.info.id === info.id)
   if (qIndex !== -1) {
     queue.splice(qIndex, 1)
-    let concurrent = Number(settings?.queue)
+    let concurrent = 1 // Number(settings?.queue)
     if (Number.isNaN(concurrent) || concurrent < 1) concurrent = 1
     if (active.length < concurrent) {
       const next = queue.find((q) => !q.started)
@@ -260,7 +268,7 @@ ipcMain.handle("compress", async (event, info: any, startAll: boolean) => {
   if (qIndex === -1) queue.push({info, started: false})
   if (startAll) {
     const settings = store.get("settings", {}) as any
-    let concurrent = Number(settings?.queue)
+    let concurrent = 1 // Number(settings?.queue)
     if (Number.isNaN(concurrent) || concurrent < 1) concurrent = 1
     if (active.length < concurrent) {
       await compress(info)
@@ -349,7 +357,7 @@ ipcMain.handle("update-concurrency", async (event, concurrent) => {
 
 ipcMain.handle("move-queue", async (event, id: number) => {
   const settings = store.get("settings", {}) as any
-  let concurrent = Number(settings?.queue)
+  let concurrent = 1 // Number(settings?.queue)
   if (Number.isNaN(concurrent) || concurrent < 1) concurrent = 1
   if (id) {
     let qIndex = queue.findIndex((q) => q.info.id === id)

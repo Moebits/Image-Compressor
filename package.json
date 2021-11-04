@@ -1,6 +1,6 @@
 {
   "name": "image-compressor",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Compresses, resizes, and renames images.",
   "main": "dist/main.js",
   "scripts": {
@@ -105,7 +105,7 @@
     "rc-slider": "^9.7.4",
     "react": "^17.0.1",
     "react-bootstrap": "^1.4.3",
-    "react-compare-slider": "github:Tenpi/react-compare-slider#dist",
+    "react-compare-slider": "github:tenpi/react-compare-slider#dist",
     "react-dom": "^17.0.1",
     "react-dropzone": "^11.4.2",
     "react-reorder": "^3.0.0-alpha.7",
