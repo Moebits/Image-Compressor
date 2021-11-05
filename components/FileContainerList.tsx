@@ -42,7 +42,7 @@ const FileContainerList: React.FunctionComponent = (props) => {
     const addSignalFunc = async () => {
         const signal = addSignal
         setAddSignal(null)
-        let index = containers.findIndex((c) => c.id === signal.pos)
+        let index = containers.findIndex((c) => c?.id === signal.pos)
         if (index === -1) index = containers.length
         const dimensions = await ipcRenderer.invoke("get-dimensions", signal.file)
         const fileSize = functions.readableFileSize(fs.statSync(signal.file).size)
@@ -61,7 +61,7 @@ const FileContainerList: React.FunctionComponent = (props) => {
     const removeContainer = (id: number) => {
         setContainers((prev) => {
             const newState = [...prev]
-            const index = newState.findIndex((c) => c.id === id)
+            const index = newState.findIndex((c) => c?.id === id)
             if  (index !== -1) newState.splice(index, 1)
             return newState
         })

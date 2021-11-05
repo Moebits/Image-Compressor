@@ -137,10 +137,11 @@ const FileContainer: React.FunctionComponent<FileContainerProps> = (props: FileC
         setNewDimension(`${width}x${height}`)
     }
 
-    const startConversion = (startAll?: boolean) => {
+    const startConversion = async (startAll?: boolean) => {
         if (started) return
         setStartSignal(false)
         webFrame.clearCache()
+        await functions.timeout(props.id)
         ipcRenderer.invoke("compress", {id: props.id, source: props.source, dest: directory, fileSize: props.fileSize, width: props.width, height: props.height, quality, overwrite, ignoreBelow, resizeWidth, resizeHeight, percentage, keepRatio, rename, format}, startAll)
         if (!startAll) {
             setStarted(true)

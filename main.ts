@@ -211,7 +211,8 @@ const compress = async (info: any) => {
   let dest = await functions.parseDest(info.source, info.dest, options.rename, options.format, width, height, options.overwrite)
   const historyIndex = history.findIndex((h) => h.id === info.id)
   if (historyIndex !== -1) history[historyIndex].dest = dest
-  active.push({id: info.id, source: info.source, dest, action: null})
+  const activeIndex = active.findIndex((a) => a.id === info.id)
+  if (activeIndex !== -1) active[activeIndex].dest = dest
   let output = ""
   let buffer = null
   try {
@@ -271,9 +272,11 @@ ipcMain.handle("compress", async (event, info: any, startAll: boolean) => {
     let concurrent = 1 // Number(settings?.queue)
     if (Number.isNaN(concurrent) || concurrent < 1) concurrent = 1
     if (active.length < concurrent) {
+      active.push({id: info.id, source: info.source, dest: "", action: null})
       await compress(info)
     }
   } else {
+    active.push({id: info.id, source: info.source, dest: "", action: null})
     await compress(info)
   }
 })

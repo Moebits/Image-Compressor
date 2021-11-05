@@ -33,16 +33,18 @@ const OptionsBar: React.FunctionComponent = (props) => {
         }
         ipcRenderer.on("add-file", addFile)
         ipcRenderer.on("upload", upload)
-        ipcRenderer.on("on-drop", onDrop)
         return () => {
             ipcRenderer.removeListener("add-file", addFile)
             ipcRenderer.removeListener("upload", upload)
-            ipcRenderer.removeListener("on-drop", onDrop)
         }
     }, [])
 
     useEffect(() => {
         ipcRenderer.invoke("store-settings", {quality, directory, overwrite, ignoreBelow, resizeWidth, resizeHeight, percentage, keepRatio, rename, format})
+        ipcRenderer.on("on-drop", onDrop)
+        return () => {
+            ipcRenderer.removeListener("on-drop", onDrop)
+        }
     })
     
     const initSettings = async () => {

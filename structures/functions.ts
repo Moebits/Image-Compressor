@@ -243,7 +243,6 @@ export default class Functions {
     }
 
     public static bufferToBase64 = (buffer: Buffer, type: string) => {
-        console.log(buffer)
         return `data:${type};base64,${buffer.toString("base64")}`
     }
 }
