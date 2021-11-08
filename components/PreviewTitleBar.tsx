@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from "react"
-import {ipcRenderer, remote} from "electron"
+import {ipcRenderer} from "electron"
+import {getCurrentWindow} from "@electron/remote"
 import minimizeButton from "../assets/icons/previewMinimize.png"
 import maximizeButton from "../assets/icons/previewMaximize.png"
 import closeButton from "../assets/icons/previewClose.png"
@@ -24,11 +25,11 @@ const PreviewTitleBar: React.FunctionComponent<PreviewTitleBarProps> = (props: P
     let [hoverOut, setHoverOut] = useState(false)
 
     const minimize = () => {
-        remote.getCurrentWindow().minimize()
+        getCurrentWindow().minimize()
     }
 
     const maximize = () => {
-        const window = remote.getCurrentWindow()
+        const window = getCurrentWindow()
         if (window.isMaximized()) {
             window.unmaximize()
         } else {
@@ -37,7 +38,7 @@ const PreviewTitleBar: React.FunctionComponent<PreviewTitleBarProps> = (props: P
     }
     
     const close = () => {
-        remote.getCurrentWindow().close()
+        getCurrentWindow().close()
     }
 
     const zoomOut = () => {

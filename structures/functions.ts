@@ -151,20 +151,20 @@ export default class Functions {
                 const results = await sagiri(source, {mask: [5]})
                 const englishTitle = await Functions.translateTitle(results[0].raw.data.title)
                 rename = rename
-                .replace(/{title}/gi, results[0].raw.data.title ?? "")
+                ?.replace(/{title}/gi, results[0].raw.data.title ?? "")
                 .replace(/{englishTitle}/gi, englishTitle)
                 .replace(/{id}/gi, results[0].raw.data.pixiv_id ?? "")
                 .replace(/{artist}/gi, results[0].raw.data.member_name ?? "")
             } catch {
                 rename = rename
-                .replace(/{title}/gi, "")
+                ?.replace(/{title}/gi, "")
                 .replace(/{englishTitle}/gi, "")
                 .replace(/{id}/gi, "")
                 .replace(/{artist}/gi, "")
             }
         }
         rename = rename
-        .replace(/{name}/gi, name)
+        ?.replace(/{name}/gi, name)
         .replace(/{width}/gi, String(width))
         .replace(/{height}/gi, String(height))
         if (!rename) rename = name
@@ -234,6 +234,7 @@ export default class Functions {
     }
 
     public static arrayBufferToBuffer(arrayBuffer: ArrayBuffer) {
+        if (!arrayBuffer.byteLength) arrayBuffer = fs.readFileSync(arrayBuffer as unknown as string)
         const buffer = Buffer.alloc(arrayBuffer.byteLength)
         const array = new Uint8Array(arrayBuffer)
         for (let i = 0; i < buffer.length; i++) {

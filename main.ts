@@ -18,6 +18,7 @@ import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
 import sharp from "sharp"
 
+require("@electron/remote/main").initialize()
 process.setMaxListeners(0)
 let window: Electron.BrowserWindow | null
 let preview: Electron.BrowserWindow | null
@@ -40,6 +41,7 @@ const openPreview = async () => {
   if (!preview) {
     preview = new BrowserWindow({width: 800, height: 600, minWidth: 720, minHeight: 450, frame: false, backgroundColor: "#181818", center: false, webPreferences: {nodeIntegration: true, contextIsolation: false, enableRemoteModule: true}})
     await preview.loadFile(path.join(__dirname, "preview.html"))
+    require("@electron/remote/main").enable(preview.webContents)
     preview?.on("closed", () => {
       preview = null
     })
@@ -256,7 +258,8 @@ const compress = async (info: any) => {
       fs.renameSync(info.source, dest)
     }
     output = dest
-  } catch {
+  } catch (error) {
+    console.log(error)
     window?.webContents.send("conversion-finished", {id: info.id, output: info.source, skipped: true})
     return nextQueue(info)
   }
@@ -497,6 +500,13 @@ if (!singleLock) {
     window = new BrowserWindow({width: 800, height: 600, minWidth: 720, minHeight: 450, frame: false, backgroundColor: "#e14952", center: true, webPreferences: {nodeIntegration: true, contextIsolation: false, enableRemoteModule: true}})
     window.loadFile(path.join(__dirname, "index.html"))
     window.removeMenu()
+    require("@electron/remote/main").enable(window.webContents)
+    if (process.platform === "darwin") {
+      fs.chmodSync(path.join(app.getAppPath(), "../../vendor/cjpeg"), "777")
+      fs.chmodSync(path.join(app.getAppPath(), "../../vendor/cwebp"), "777")
+      fs.chmodSync(path.join(app.getAppPath(), "../../vendor/gifsicle"), "777")
+      fs.chmodSync(path.join(app.getAppPath(), "../../vendor/pngquant"), "777")
+    }
     window.on("close", () => {
       preview?.close()
     })

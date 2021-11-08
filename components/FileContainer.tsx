@@ -1,4 +1,5 @@
-import {ipcRenderer, remote, webFrame} from "electron"
+import {ipcRenderer, webFrame} from "electron"
+import {shell} from "@electron/remote"
 import path from "path"
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ProgressBar} from "react-bootstrap"
@@ -267,9 +268,9 @@ const FileContainer: React.FunctionComponent<FileContainerProps> = (props: FileC
         const location = output ? output : props.source
         if (!fs.existsSync(location)) return
         if (direct) {
-            remote.shell.openPath(path.normalize(location))
+            shell.openPath(path.normalize(location))
         } else {
-            remote.shell.showItemInFolder(path.normalize(location))
+            shell.showItemInFolder(path.normalize(location))
         }
     }
 

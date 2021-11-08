@@ -98,7 +98,7 @@ const GroupAction: React.FunctionComponent = (props) => {
             <section className="group-action-container">
                     <img src={getImage("start")} onClick={start} className="group-action-button" width="319" height="61" onMouseEnter={() => setStartHover(true)} onMouseLeave={() => setStartHover(false)}/>
                     <img src={getImage("clear")} onClick={clear} className="group-action-button" width="319" height="61" onMouseEnter={() => setClearHover(true)} onMouseLeave={() => setClearHover(false)}/>
-                    <img src={getImage("delete")} onClick={deleteDupes} className="group-action-button" width="442" height="61" onMouseEnter={() => setDeleteHover(true)} onMouseLeave={() => setDeleteHover(false)}/>
+                    <img src={getImage("delete")} onClick={deleteDupes} className="group-action-button" width="462" height="61" onMouseEnter={() => setDeleteHover(true)} onMouseLeave={() => setDeleteHover(false)}/>
             </section>
         )
     }

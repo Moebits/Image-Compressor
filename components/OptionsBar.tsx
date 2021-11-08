@@ -1,4 +1,5 @@
-import {ipcRenderer, remote} from "electron"
+import {ipcRenderer} from "electron"
+import {shell} from "@electron/remote"
 import React, {useContext, useEffect, useState} from "react"
 import {Dropdown, DropdownButton} from "react-bootstrap"
 import folderButton from "../assets/icons/folder.png"
@@ -127,7 +128,7 @@ const OptionsBar: React.FunctionComponent = (props) => {
             <div className="options-bar-row">
                 <div className="download-location">
                     <img className="download-location-img" width="25" height="25" src={folderHover ? folderButtonHover : folderButton} onMouseEnter={() => setFolderHover(true)} onMouseLeave={() => setFolderHover(false)} onClick={changeDirectory}/>
-                    <p><span className="download-location-text" onDoubleClick={() => remote.shell.openPath(directory)}>{directory}</span></p>
+                    <p><span className="download-location-text" onDoubleClick={() => shell.openPath(directory)}>{directory}</span></p>
                 </div>
                 <div className="options-bar-box">
                     <input className="options-bar-checkbox" type="checkbox" checked={overwrite} onChange={() => setOverwrite((prev: boolean) => !prev)}/>
