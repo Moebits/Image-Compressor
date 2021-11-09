@@ -76,7 +76,6 @@ const App: React.FunctionComponent = () => {
                         <div className="preview-container">
                             <ReactCompareSlider
                                 changePositionOnHover={true}
-                                zoomScale={zoomScale}
                                 handle={<><p className="preview-text">{oldFileSize}</p><ReactCompareSliderHandle buttonStyle={{display: "none"}} linesStyle={{height: "100%", width: 1, color: "black", opacity: 0.5, cursor: "default"}}/><p className="preview-text2">{newFileSize}</p></>}
                                 itemOne={<img src={oldImage} className="image"/>}
                                 itemTwo={<img src={newImage} className="image"/>}

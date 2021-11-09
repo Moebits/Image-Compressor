@@ -17,6 +17,8 @@ import lightButton from "../assets/icons/light.png"
 import lightButtonHover from "../assets/icons/light-hover.png"
 import darkButton from "../assets/icons/dark.png"
 import darkButtonHover from "../assets/icons/dark-hover.png"
+import flattenButton from "../assets/icons/flatten.png"
+import flattenButtonHover from "../assets/icons/flatten-hover.png"
 import "../styles/titlebar.less"
 
 const TitleBar: React.FunctionComponent = (props) => {
@@ -27,6 +29,7 @@ const TitleBar: React.FunctionComponent = (props) => {
     const [hoverReload, setHoverReload] = useState(false)
     const [hoverStar, setHoverStar] = useState(false)
     const [hoverTheme, setHoverTheme] = useState(false)
+    const [hoverFlatten, setHoverFlatten] = useState(false)
     const [theme, setTheme] = useState("light")
 
     useEffect(() => {
@@ -50,14 +53,22 @@ const TitleBar: React.FunctionComponent = (props) => {
             window.maximize()
         }
     }
+
     const close = () => {
         getCurrentWindow().close()
     }
+
     const star = () => {
         shell.openExternal(pack.repository.url)
     }
+
     const update = () => {
         ipcRenderer.invoke("check-for-updates", false)
+    }
+
+    const flatten = async () => {
+        const directory = await ipcRenderer.invoke("flatten-directory")
+        if (directory) ipcRenderer.invoke("flatten", directory)
     }
 
     const changeTheme = (value?: string) => {
@@ -100,6 +111,7 @@ const TitleBar: React.FunctionComponent = (props) => {
                     </div>
                     <div className="title-bar-buttons">
                     <img src={hoverTheme ? (theme === "light" ? darkButtonHover : lightButtonHover) : (theme === "light" ? darkButton : lightButton)} height="20" width="20" className="title-bar-button theme-button" onClick={() => changeTheme()} onMouseEnter={() => setHoverTheme(true)} onMouseLeave={() => setHoverTheme(false)}/>
+                        <img src={hoverFlatten ? flattenButtonHover : flattenButton} height="20" width="20" className="title-bar-button flatten-button" onClick={flatten} onMouseEnter={() => setHoverFlatten(true)} onMouseLeave={() => setHoverFlatten(false)}/>
                         <img src={hoverStar ? starButtonHover : starButton} height="20" width="20" className="title-bar-button star-button" onClick={star} onMouseEnter={() => setHoverStar(true)} onMouseLeave={() => setHoverStar(false)}/>
                         <img src={hoverReload ? updateButtonHover : updateButton} height="20" width="20" className="title-bar-button update-button" onClick={update} onMouseEnter={() => setHoverReload(true)} onMouseLeave={() => setHoverReload(false)}/>
                         <img src={hoverMin ? minimizeButtonHover : minimizeButton} height="20" width="20" className="title-bar-button" onClick={minimize} onMouseEnter={() => setHoverMin(true)} onMouseLeave={() => setHoverMin(false)}/>

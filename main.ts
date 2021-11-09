@@ -29,6 +29,45 @@ const history: Array<{id: number, source: string, dest?: string}> = []
 const active: Array<{id: number, source: string, dest: string, action: null | "stop"}> = []
 const queue: Array<{started: boolean, info: any}> = []
 
+const subFiles = (directory: string) => {
+  let files: string[] = []
+  let directories: string[] = []
+  const dirFiles = fs.readdirSync(directory).map((f) => `${directory}/${f}`)
+  for (let i = 0; i < dirFiles.length; i++) {
+    if (fs.lstatSync(dirFiles[i]).isDirectory()) {
+      directories.push(dirFiles[i])
+      const sub = subFiles(dirFiles[i])
+      files.push(...sub.files)
+      directories.push(...sub.directories)
+    } else {
+      files.push(dirFiles[i])
+    }
+  }
+  return {files, directories}
+}
+
+ipcMain.handle("flatten", async (event, directory: string) => {
+  const {files, directories} = subFiles(directory)
+  for (let i = 0; i < files.length; i++) {
+    const newName = `${directory}/${path.basename(files[i])}`
+    fs.renameSync(files[i], newName)
+  }
+  for (let i = 0; i < directories.length; i++) {
+    fs.rmdirSync(directories[i])
+  }
+  shell.openPath(directory)
+})
+
+ipcMain.handle("flatten-directory", async () => {
+  if (!window) return
+  const result = await dialog.showOpenDialog(window, {
+    properties: ["openDirectory"],
+    buttonLabel: "Flatten",
+    title: "Flatten Directory"
+  })
+  return result.filePaths[0]
+})
+
 ipcMain.handle("zoom-out", () => {
   preview?.webContents.send("zoom-out")
 })
@@ -216,12 +255,13 @@ const compress = async (info: any) => {
   const activeIndex = active.findIndex((a) => a.id === info.id)
   if (activeIndex !== -1) active[activeIndex].dest = dest
   let output = ""
-  let buffer = null
+  let buffer = fs.readFileSync(info.source)
   try {
+    const sourceExt = path.extname(info.source).replaceAll(".", "")
     const ext = path.extname(dest).replaceAll(".", "")
+    const resizeCondition = options.keepRatio ? (options.percentage ? options.resizeWidth !== 100 : true) : (options.percentage ? (options.resizeWidth !== 100 && options.resizeHeight !== 100) : true)
     if (ext === "gif") {
-      const condition = options.keepRatio ? (options.percentage ? options.resizeWidth !== 100 : true) : (options.percentage ? (options.resizeWidth !== 100 && options.resizeHeight !== 100) : true)
-      if (condition) {
+      if (resizeCondition) {
         const {frameArray, delayArray} = await functions.getGIFFrames(info.source)
         const newFrameArray = [] as Buffer[]
         for (let i = 0; i < frameArray.length; i++) {
@@ -231,27 +271,38 @@ const compress = async (info: any) => {
           newFrameArray.push(newFrame)
         }
         buffer = await functions.encodeGIF(newFrameArray, delayArray, width, height)
-        buffer = await imagemin.buffer(buffer, {plugins: [
-          imageminGifsicle({optimizationLevel: 3})
-        ]})
+        if (options.quality !== 100) {
+          buffer = await imagemin.buffer(buffer, {plugins: [
+            imageminGifsicle({optimizationLevel: 3})
+          ]})
+        }
       } else {
-        buffer = await imagemin([info.source], {plugins: [
-          imageminGifsicle({optimizationLevel: 3})
-        ]}).then((i: any) => i[0].data)
+        if (options.quality !== 100) {
+          buffer = await imagemin([info.source], {plugins: [
+            imageminGifsicle({optimizationLevel: 3})
+          ]}).then((i: any) => i[0].data)
+        }
       }
     } else {
-      let s = sharp(info.source, {animated: true}).resize(width, height, {fit: "fill"})
-      if (ext === "jpg" || ext === "jpeg") s.jpeg()
-      if (ext === "png") s.png()
-      if (ext === "webp") s.webp()
-      if (ext === "gif") s.gif()
-      buffer = await s.toBuffer()
-      buffer = await imagemin.buffer(buffer, {plugins: [
-        imageminMozjpeg({quality: options.quality}),
-        imageminPngquant(),
-        imageminWebp({quality: options.quality}),
-        imageminGifsicle({optimizationLevel: 3})
-      ]})
+      if (resizeCondition) {
+        buffer = await sharp(buffer, {animated: true}).resize(width, height, {fit: "fill"}).toBuffer()
+      }
+      if (sourceExt !== ext) {
+        let s = sharp(buffer, {animated: true})
+        if (ext === "jpg" || ext === "jpeg") s.jpeg()
+        if (ext === "png") s.png()
+        if (ext === "webp") s.webp()
+        if (ext === "gif") s.gif()
+        buffer = await s.toBuffer()
+      }
+      if (options.quality !== 100) {
+        buffer = await imagemin.buffer(buffer, {plugins: [
+          imageminMozjpeg({quality: options.quality}),
+          imageminPngquant(),
+          imageminWebp({quality: options.quality}),
+          imageminGifsicle({optimizationLevel: 3})
+        ]})
+      }
     }
     fs.writeFileSync(options.overwrite ? info.source : dest, buffer)
     if (options.overwrite) {
@@ -303,12 +354,13 @@ ipcMain.handle("compress-realtime", async (event, info: any) => {
   }
   const {width, height} = functions.parseNewDimensions(info.width, info.height, options.resizeWidth, options.resizeHeight, options.percentage, options.keepRatio)
   const dest = await functions.parseDest(info.source, info.dest, "{name}", options.format, width, height, options.overwrite)
+  let buffer = fs.readFileSync(info.source)
   try {
+    const sourceExt = path.extname(info.source).replaceAll(".", "")
     const ext = path.extname(dest).replaceAll(".", "")
-    let buffer = null
+    const resizeCondition = options.keepRatio ? (options.percentage ? options.resizeWidth !== 100 : true) : (options.percentage ? (options.resizeWidth !== 100 && options.resizeHeight !== 100) : true)
     if (ext === "gif") {
-      const condition = options.keepRatio ? (options.percentage ? options.resizeWidth !== 100 : true) : (options.percentage ? (options.resizeWidth !== 100 && options.resizeHeight !== 100) : true)
-      if (condition) {
+      if (resizeCondition) {
         const {frameArray, delayArray} = await functions.getGIFFrames(info.source)
         const newFrameArray = [] as Buffer[]
         for (let i = 0; i < frameArray.length; i++) {
@@ -318,27 +370,38 @@ ipcMain.handle("compress-realtime", async (event, info: any) => {
           newFrameArray.push(newFrame)
         }
         buffer = await functions.encodeGIF(newFrameArray, delayArray, width, height)
-        buffer = await imagemin.buffer(buffer, {plugins: [
-          imageminGifsicle({optimizationLevel: 3})
-        ]})
+        if (options.quality !== 100) {
+          buffer = await imagemin.buffer(buffer, {plugins: [
+            imageminGifsicle({optimizationLevel: 3})
+          ]})
+        }
       } else {
-        buffer = await imagemin([info.source], {plugins: [
-          imageminGifsicle({optimizationLevel: 3})
-        ]}).then((i: any) => i[0].data)
+        if (options.quality !== 100) {
+          buffer = await imagemin([info.source], {plugins: [
+            imageminGifsicle({optimizationLevel: 3})
+          ]}).then((i: any) => i[0].data)
+        }
       }
     } else {
-      let s = sharp(info.source, {animated: true}).resize(width, height, {fit: "fill"})
-      if (ext === "jpg" || ext === "jpeg") s.jpeg()
-      if (ext === "png") s.png()
-      if (ext === "webp") s.webp()
-      if (ext === "gif") s.gif()
-      buffer = await s.toBuffer()
-      buffer = await imagemin.buffer(buffer, {plugins: [
-        imageminMozjpeg({quality: options.quality}),
-        imageminPngquant(),
-        imageminWebp({quality: options.quality}),
-        imageminGifsicle({optimizationLevel: 3})
-      ]})
+      if (resizeCondition) {
+        buffer = await sharp(buffer, {animated: true}).resize(width, height, {fit: "fill"}).toBuffer()
+      }
+      if (sourceExt !== ext) {
+        let s = sharp(buffer, {animated: true})
+        if (ext === "jpg" || ext === "jpeg") s.jpeg()
+        if (ext === "png") s.png()
+        if (ext === "webp") s.webp()
+        if (ext === "gif") s.gif()
+        buffer = await s.toBuffer()
+      }
+      if (options.quality !== 100) {
+        buffer = await imagemin.buffer(buffer, {plugins: [
+          imageminMozjpeg({quality: options.quality}),
+          imageminPngquant(),
+          imageminWebp({quality: options.quality}),
+          imageminGifsicle({optimizationLevel: 3})
+        ]})
+      }
     }
     return {buffer, fileSize: Buffer.byteLength(buffer)}
   } catch {
@@ -455,9 +518,15 @@ ipcMain.handle("select-files", async () => {
       {name: "Images", extensions: ["png", "jpg", "jpeg", "webp"]},
       {name: "GIF", extensions: ["gif"]}
     ],
-    properties: ["multiSelections", "openFile"]
+    properties: ["multiSelections", "openFile", "openDirectory"]
   })
-  return files.filePaths
+  const filePaths = files.filePaths
+  if (filePaths.length === 1) {
+    if (fs.lstatSync(filePaths[0]).isDirectory()) {
+      return fs.readdirSync(filePaths[0]).map((f) => `${filePaths[0]}/${f}`)
+    }
+  }
+  return filePaths
 })
 
 ipcMain.handle("get-downloads-folder", async () => {
@@ -502,10 +571,17 @@ if (!singleLock) {
     window.removeMenu()
     require("@electron/remote/main").enable(window.webContents)
     if (process.platform === "darwin") {
-      fs.chmodSync(path.join(app.getAppPath(), "../../vendor/cjpeg"), "777")
-      fs.chmodSync(path.join(app.getAppPath(), "../../vendor/cwebp"), "777")
-      fs.chmodSync(path.join(app.getAppPath(), "../../vendor/gifsicle"), "777")
-      fs.chmodSync(path.join(app.getAppPath(), "../../vendor/pngquant"), "777")
+      if (process.env.DEVELOPMENT === "true") {
+        fs.chmodSync(path.join(__dirname, "../vendor/cjpeg"), "777")
+        fs.chmodSync(path.join(__dirname, "../vendor/cwebp"), "777")
+        fs.chmodSync(path.join(__dirname, "../vendor/gifsicle"), "777")
+        fs.chmodSync(path.join(__dirname, "../vendor/pngquant"), "777")
+      } else {
+        fs.chmodSync(path.join(app.getAppPath(), "vendor/cjpeg"), "777")
+        fs.chmodSync(path.join(app.getAppPath(), "vendor/cwebp"), "777")
+        fs.chmodSync(path.join(app.getAppPath(), "vendor/gifsicle"), "777")
+        fs.chmodSync(path.join(app.getAppPath(), "vendor/pngquant"), "777")
+      }
     }
     window.on("close", () => {
       preview?.close()
@@ -516,11 +592,11 @@ if (!singleLock) {
     localShortcut.register("Ctrl+O", () => {
       window?.webContents.send("upload")
     }, window, {strict: true})
+    globalShortcut.register("Control+Shift+I", () => {
+      window?.webContents.toggleDevTools()
+      preview?.webContents.toggleDevTools()
+    })
     if (process.env.DEVELOPMENT === "true") {
-      globalShortcut.register("Control+Shift+I", () => {
-        window?.webContents.toggleDevTools()
-        preview?.webContents.toggleDevTools()
-      })
     }
   })
 }
