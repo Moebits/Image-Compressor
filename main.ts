@@ -309,13 +309,13 @@ const compress = async (info: any) => {
       fs.renameSync(info.source, dest)
     }
     output = dest
+    window?.webContents.send("conversion-finished", {id: info.id, output, buffer, fileSize: Buffer.byteLength(buffer)})
+    return nextQueue(info)
   } catch (error) {
     console.log(error)
     window?.webContents.send("conversion-finished", {id: info.id, output: info.source, skipped: true})
     return nextQueue(info)
   }
-  window?.webContents.send("conversion-finished", {id: info.id, output, buffer, fileSize: Buffer.byteLength(buffer)})
-  nextQueue(info)
 }
 
 ipcMain.handle("compress", async (event, info: any, startAll: boolean) => {
@@ -403,8 +403,10 @@ ipcMain.handle("compress-realtime", async (event, info: any) => {
         ]})
       }
     }
+    console.log(buffer)
     return {buffer, fileSize: Buffer.byteLength(buffer)}
-  } catch {
+  } catch (error) {
+    console.log(error)
     return {buffer: info.source, fileSize}
   }
 })
@@ -522,7 +524,7 @@ ipcMain.handle("select-files", async () => {
   const files = await dialog.showOpenDialog(window, {
     filters: [
       {name: "All Files", extensions: ["*"]},
-      {name: "Images", extensions: ["png", "jpg", "jpeg", "webp"]},
+      {name: "Images", extensions: ["png", "jpg", "jpeg", "webp", "avif", "tiff"]},
       {name: "GIF", extensions: ["gif"]}
     ],
     properties: ["multiSelections", "openFile", "openDirectory"]

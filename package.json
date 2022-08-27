@@ -1,6 +1,6 @@
 {
   "name": "image-compressor",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Compresses, resizes, and renames images.",
   "main": "dist/main.js",
   "scripts": {
@@ -43,10 +43,22 @@
       },
       "category": "public.app-category.utilities",
       "extraResources": [
-        {"from": "vendor/cjpeg.app", "to": "app/vendor/cjpeg"},
-        {"from": "vendor/cwebp.app", "to": "app/vendor/cwebp"},
-        {"from": "vendor/gifsicle.app", "to": "app/vendor/gifsicle"},
-        {"from": "vendor/pngquant.app", "to": "app/vendor/pngquant"}
+        {
+          "from": "vendor/cjpeg.app",
+          "to": "app/vendor/cjpeg"
+        },
+        {
+          "from": "vendor/cwebp.app",
+          "to": "app/vendor/cwebp"
+        },
+        {
+          "from": "vendor/gifsicle.app",
+          "to": "app/vendor/gifsicle"
+        },
+        {
+          "from": "vendor/pngquant.app",
+          "to": "app/vendor/pngquant"
+        }
       ]
     },
     "dmg": {
@@ -121,7 +133,7 @@
     "css-loader": "^5.0.1",
     "del-cli": "^3.0.1",
     "electron": "^14.0.0",
-    "electron-builder": "^22.13.1",
+    "electron-builder": "^23.0.3",
     "file-loader": "^6.2.0",
     "fork-ts-checker-webpack-plugin": "^6.1.0",
     "html-loader": "^1.3.2",
@@ -163,7 +175,7 @@
     "react-zoom-pan-pinch": "^2.1.3",
     "sagiri": "^3.1.1",
     "shade-blend-color": "^1.0.0",
-    "sharp": "^0.29.2",
+    "sharp": "^0.30.7",
     "sharp-phash": "^2.0.0"
   }
 }

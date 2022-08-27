@@ -7,7 +7,7 @@ import path from "path"
 import Sagiri from "sagiri"
 import {translate} from "bing-translate-api"
 
-const images = [".png", ".jpg", ".jpeg", ".webp"]
+const images = [".png", ".jpg", ".jpeg", ".webp", ".avif", ".tiff"]
 const gifs = [".gif"]
 
 export default class Functions {

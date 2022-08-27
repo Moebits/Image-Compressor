@@ -40,7 +40,7 @@ const FileContainerList: React.FunctionComponent = (props) => {
     })
 
     const addSignalFunc = async () => {
-        const signal = addSignal
+        const signal = Object.assign({}, addSignal)
         setAddSignal(null)
         let index = containers.findIndex((c) => c?.id === signal.pos)
         if (index === -1) index = containers.length
