@@ -36,7 +36,7 @@ You can customize the output names. If it results in a blank name (eg. not found
 
 Download the installer from the [releases](https://github.com/Tenpi/Image-Compressor/releases) tab.
 
-### Image to PDF
+### PDF to Images
 This requires installing poppler (pdfimages). On MacOS, install with the following:
 ```
 brew install poppler
