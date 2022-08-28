@@ -10,7 +10,7 @@ This is a bulk image compressor, resizer, and renamer. Great for organizing your
 - Delete duplicate images (the one with the greatest dimensions is retained)
 - Flatten a folder (move all files in sub-folders to the parent and delete sub-folders)
 - Convert images to PDF (or a directory containing images)
-- Convert PDFs to image directories (requires poppler)
+- Convert PDFs to image directories
 - Choose to overwrite images or write to a folder
 - Ignore images under a certain file size (to avoid over-compression)
 - Preview before and after images (right click on the thumbnails)
@@ -35,12 +35,6 @@ You can customize the output names. If it results in a blank name (eg. not found
 ### Installation
 
 Download the installer from the [releases](https://github.com/Tenpi/Image-Compressor/releases) tab.
-
-### Image to PDF
-This requires installing poppler (pdfimages). On MacOS, install with the following:
-```
-brew install poppler
-```
 
 ### Bugs and Requests
 

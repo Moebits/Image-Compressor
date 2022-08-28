@@ -36,6 +36,13 @@ const App = () => {
   const [rename, setRename] = useState("{name}")
   const [format, setFormat] = useState("original")
 
+  useEffect(() => {
+    ipcRenderer.on("debug", console.log)
+    return () => {
+      ipcRenderer.removeListener("debug", console.log)
+    }
+  })
+
   const onDrop = (files: any) => {
     files = files.map((f: any) => f.path)
     ipcRenderer.invoke("on-drop", files)

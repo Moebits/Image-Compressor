@@ -29,6 +29,10 @@ require("@electron/remote/main").initialize()
 process.setMaxListeners(0)
 let window: Electron.BrowserWindow | null
 let preview: Electron.BrowserWindow | null
+let popplerPath = undefined as any
+if (process.platform === "darwin") popplerPath = path.join(app.getAppPath(), "../../poppler/mac/bin/pdfimages")
+if (process.platform === "win32") popplerPath = path.join(app.getAppPath(), "../../poppler/windows/bin/pdfimages.exe") 
+if (!fs.existsSync(popplerPath)) popplerPath = undefined
 autoUpdater.autoDownload = false
 const store = new Store()
 
@@ -87,8 +91,10 @@ ipcMain.handle("pdf", async (event, files: string[]) => {
     const saveFilename = path.basename(PDFs[i], path.extname(PDFs[i]))
     const savePath = path.join(dir, saveFilename)
     if (!fs.existsSync(savePath)) fs.mkdirSync(savePath)
-    exec(`cd "${savePath}" && pdfimages -j -q "${PDFs[i]}" "${saveFilename}"`)
+    const pdfimages = popplerPath ? popplerPath : "pdfimages"
+    exec(`cd "${savePath}" && "${pdfimages}" -j -q "${PDFs[i]}" "${saveFilename}"`)
     .then(() => fs.unlinkSync(PDFs[i]))
+    .catch((e) => window?.webContents.send("debug", e))
     if (!openDir) openDir = PDFs[0]
   }
 
