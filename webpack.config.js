@@ -68,6 +68,7 @@ module.exports = [
     module: {
       rules: [
           {test: /\.(jpe?g|png|gif|svg|mp3|wav|mp4|yml|txt)$/, exclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
+          {test: /\.afm$/, loader: "raw-loader"},
           {test: /\.(tsx?|jsx?)$/, exclude, use: [{loader: "ts-loader", options: {transpileOnly: true}}]},
           {test: /\.node$/, loader: "node-loader"}
       ]

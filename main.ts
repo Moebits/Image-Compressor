@@ -17,6 +17,13 @@ import imageminPngquant from "imagemin-pngquant"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
 import sharp from "sharp"
+// @ts-ignore
+import Helvetica from "pdfkit/js/data/Helvetica.afm"
+import PDFDocument from "pdfkit"
+import child_process from "child_process"
+import util from "util"
+
+const exec = util.promisify(child_process.exec)
 
 require("@electron/remote/main").initialize()
 process.setMaxListeners(0)
@@ -28,6 +35,79 @@ const store = new Store()
 const history: Array<{id: number, source: string, dest?: string}> = []
 const active: Array<{id: number, source: string, dest: string, action: null | "stop"}> = []
 const queue: Array<{started: boolean, info: any}> = []
+
+if (!fs.existsSync(path.join(__dirname, "data"))) fs.mkdirSync(path.join(__dirname, "data"))
+fs.writeFileSync(path.join(__dirname, "data/Helvetica.afm"), Helvetica)
+
+const createPDF = async (dir: string, images: string[]) => {
+  images = images.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
+  const pdf = new PDFDocument({autoFirstPage: false})
+
+  pdf.pipe(fs.createWriteStream(`${path.dirname(dir)}/${path.basename(dir, path.extname(dir))}.pdf`))
+  
+  for (let i = 0; i < images.length; i++) {
+    const image = pdf.openImage(images[i])
+    pdf.addPage({size: [image.width, image.height]})
+    pdf.image(image, 0, 0)
+  }
+
+  const promiseArray: any[] = []
+  for (let i = 0; i < images.length; i++) {
+    promiseArray.push(new Promise<void>((resolve) => {
+      fs.unlink(images[i], () => resolve())
+    }))
+  }
+
+  await Promise.all(promiseArray)
+
+  pdf.end()
+}
+
+ipcMain.handle("pdf", async (event, files: string[]) => {
+  const directories = files.filter((f) => fs.lstatSync(f).isDirectory())
+  const PDFs = files.filter((f) => path.extname(f) === ".pdf")
+  const images = files.filter((f) => path.extname(f) === ".jpg" || path.extname(f) === ".png" || path.extname(f) === ".jpeg")
+
+  let openDir = ""
+
+  for (let i = 0; i < directories.length; i++) {
+    const dir = directories[i]
+    const images = fs.readdirSync(dir).map((i) => path.join(dir, i))
+    await createPDF(dir, images)
+    try {
+      fs.rmdirSync(dir)
+    } catch (e) {
+      console.log(e)
+    }
+    if (!openDir) openDir = directories[0]
+  }
+
+  for (let i = 0; i < PDFs.length; i++) {
+    const dir = path.dirname(PDFs[i])
+    const saveFilename = path.basename(PDFs[i], path.extname(PDFs[i]))
+    const savePath = path.join(dir, saveFilename)
+    if (!fs.existsSync(savePath)) fs.mkdirSync(savePath)
+    exec(`cd "${savePath}" && pdfimages -j -q "${PDFs[i]}" "${saveFilename}"`)
+    .then(() => fs.unlinkSync(PDFs[i]))
+    if (!openDir) openDir = PDFs[0]
+  }
+
+  if (images.length) {
+    await createPDF(images[0], images)
+    if (!openDir) openDir = images[0]
+  }
+  shell.openPath(path.dirname(openDir))
+})
+
+ipcMain.handle("pdf-images", async () => {
+  if (!window) return
+  const result = await dialog.showOpenDialog(window, {
+    properties: ["openFile", "openDirectory", "multiSelections"],
+    buttonLabel: "Convert",
+    title: "Convert or Extract PDF"
+  })
+  return result.filePaths
+})
 
 const subFiles = (directory: string) => {
   let files: string[] = []
@@ -605,8 +685,6 @@ if (!singleLock) {
       window?.webContents.toggleDevTools()
       preview?.webContents.toggleDevTools()
     })
-    if (process.env.DEVELOPMENT === "true") {
-    }
   })
 }
 
