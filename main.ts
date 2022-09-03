@@ -76,7 +76,8 @@ ipcMain.handle("pdf", async (event, files: string[]) => {
 
   for (let i = 0; i < directories.length; i++) {
     const dir = directories[i]
-    const images = fs.readdirSync(dir).map((i) => path.join(dir, i))
+    let images = fs.readdirSync(dir).map((i) => path.join(dir, i))
+    images = images.filter((f) => path.extname(f) === ".jpg" || path.extname(f) === ".png" || path.extname(f) === ".jpeg")
     await createPDF(dir, images)
     try {
       fs.rmdirSync(dir)
