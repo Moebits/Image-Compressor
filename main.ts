@@ -43,6 +43,20 @@ const queue: Array<{started: boolean, info: any}> = []
 if (!fs.existsSync(path.join(__dirname, "data"))) fs.mkdirSync(path.join(__dirname, "data"))
 fs.writeFileSync(path.join(__dirname, "data/Helvetica.afm"), Helvetica)
 
+const extractCover = async (dir: string, images: string[]) => {
+  images = images.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
+  fs.writeFileSync(`${path.dirname(dir)}/${path.basename(dir, path.extname(dir))}.jpg`, fs.readFileSync(images[0]))
+
+  const promiseArray: any[] = []
+  for (let i = 0; i < images.length; i++) {
+    promiseArray.push(new Promise<void>((resolve) => {
+      fs.unlink(images[i], () => resolve())
+    }))
+  }
+
+  await Promise.all(promiseArray)
+}
+
 const createPDF = async (dir: string, images: string[]) => {
   images = images.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
   const pdf = new PDFDocument({autoFirstPage: false})
@@ -66,6 +80,55 @@ const createPDF = async (dir: string, images: string[]) => {
 
   pdf.end()
 }
+
+ipcMain.handle("pdf-cover", async (event, files: string[]) => {
+  const directories = files.filter((f) => fs.lstatSync(f).isDirectory())
+  const PDFs = files.filter((f) => path.extname(f) === ".pdf")
+  const images = files.filter((f) => path.extname(f) === ".jpg" || path.extname(f) === ".png" || path.extname(f) === ".jpeg")
+
+  let openDir = ""
+
+  for (let i = 0; i < directories.length; i++) {
+    const dir = directories[i]
+    let images = fs.readdirSync(dir).map((i) => path.join(dir, i))
+    images = images.filter((f) => path.extname(f) === ".jpg" || path.extname(f) === ".png" || path.extname(f) === ".jpeg")
+    await extractCover(dir, images)
+    try {
+      fs.rmdirSync(dir)
+    } catch (e) {
+      console.log(e)
+    }
+    if (!openDir) openDir = directories[0]
+  }
+
+  for (let i = 0; i < PDFs.length; i++) {
+    const dir = path.dirname(PDFs[i])
+    const saveFilename = path.basename(PDFs[i], path.extname(PDFs[i]))
+    const savePath = path.join(dir, saveFilename)
+    if (!fs.existsSync(savePath)) fs.mkdirSync(savePath)
+    const pdfimages = popplerPath ? popplerPath : "pdfimages"
+    exec(`cd "${savePath}" && "${pdfimages}" -j -q "${PDFs[i]}" "${saveFilename}"`)
+    .then(async () => {
+      fs.unlinkSync(PDFs[i])
+      let images = fs.readdirSync(savePath).map((i) => path.join(savePath, i))
+      images = images.filter((f) => path.extname(f) === ".jpg" || path.extname(f) === ".png" || path.extname(f) === ".jpeg")
+      await extractCover(savePath, images)
+      try {
+        fs.rmdirSync(savePath)
+      } catch (e) {
+        console.log(e)
+      }
+    })
+    .catch((e) => window?.webContents.send("debug", e))
+    if (!openDir) openDir = PDFs[0]
+  }
+
+  if (images.length) {
+    await extractCover(images[0], images)
+    if (!openDir) openDir = images[0]
+  }
+  shell.openPath(path.dirname(openDir))
+})
 
 ipcMain.handle("pdf", async (event, files: string[]) => {
   const directories = files.filter((f) => fs.lstatSync(f).isDirectory())
@@ -106,12 +169,12 @@ ipcMain.handle("pdf", async (event, files: string[]) => {
   shell.openPath(path.dirname(openDir))
 })
 
-ipcMain.handle("pdf-images", async () => {
+ipcMain.handle("pdf-images", async (event, cover?: boolean) => {
   if (!window) return
   const result = await dialog.showOpenDialog(window, {
     properties: ["openFile", "openDirectory", "multiSelections"],
     buttonLabel: "Convert",
-    title: "Convert or Extract PDF"
+    title: cover ? "PDF or Image Directory Cover" : "Convert or Extract PDF"
   })
   return result.filePaths
 })
