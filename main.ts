@@ -213,7 +213,7 @@ ipcMain.handle("pdf-images", async (event, cover?: boolean, rename?: boolean) =>
   if (!window) return
   const result = await dialog.showOpenDialog(window, {
     properties: ["openFile", "openDirectory", "multiSelections"],
-    buttonLabel: "Convert",
+    buttonLabel: rename ? "Rename" : "Convert",
     title
   })
   return result.filePaths
