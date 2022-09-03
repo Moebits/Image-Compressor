@@ -23,6 +23,8 @@ import pdfButton from "../assets/icons/pdf.png"
 import pdfButtonHover from "../assets/icons/pdf-hover.png"
 import coverButton from "../assets/icons/cover.png"
 import coverButtonHover from "../assets/icons/cover-hover.png"
+import renameButton from "../assets/icons/rename.png"
+import renameButtonHover from "../assets/icons/rename-hover.png"
 import "../styles/titlebar.less"
 
 const TitleBar: React.FunctionComponent = (props) => {
@@ -36,6 +38,7 @@ const TitleBar: React.FunctionComponent = (props) => {
     const [hoverFlatten, setHoverFlatten] = useState(false)
     const [hoverPDF, setHoverPDF] = useState(false)
     const [hoverCover, setHoverCover] = useState(false)
+    const [hoverRename, setHoverRename] = useState(false)
     const [theme, setTheme] = useState("light")
 
     useEffect(() => {
@@ -87,6 +90,11 @@ const TitleBar: React.FunctionComponent = (props) => {
         if (images?.[0]) ipcRenderer.invoke("pdf-cover", images)
     }
 
+    const rename = async () => {
+        const images = await ipcRenderer.invoke("pdf-images", false, true)
+        if (images?.[0]) ipcRenderer.invoke("rename", images)
+    }
+
     const changeTheme = (value?: string) => {
         let condition = value !== undefined ? value === "dark" : theme === "light"
         if (condition) {
@@ -127,6 +135,7 @@ const TitleBar: React.FunctionComponent = (props) => {
                     </div>
                     <div className="title-bar-buttons">
                     <img src={hoverTheme ? (theme === "light" ? darkButtonHover : lightButtonHover) : (theme === "light" ? darkButton : lightButton)} height="20" width="20" className="title-bar-button theme-button" onClick={() => changeTheme()} onMouseEnter={() => setHoverTheme(true)} onMouseLeave={() => setHoverTheme(false)}/>
+                        <img src={hoverRename ? renameButtonHover : renameButton} height="20" width="20" className="title-bar-button rename-button" onClick={rename} onMouseEnter={() => setHoverRename(true)} onMouseLeave={() => setHoverRename(false)}/>
                         <img src={hoverCover ? coverButtonHover : coverButton} height="20" width="20" className="title-bar-button cover-button" onClick={cover} onMouseEnter={() => setHoverCover(true)} onMouseLeave={() => setHoverCover(false)}/>
                         <img src={hoverPDF ? pdfButtonHover : pdfButton} height="20" width="20" className="title-bar-button pdf-button" onClick={pdf} onMouseEnter={() => setHoverPDF(true)} onMouseLeave={() => setHoverPDF(false)}/>
                         <img src={hoverFlatten ? flattenButtonHover : flattenButton} height="20" width="20" className="title-bar-button flatten-button" onClick={flatten} onMouseEnter={() => setHoverFlatten(true)} onMouseLeave={() => setHoverFlatten(false)}/>

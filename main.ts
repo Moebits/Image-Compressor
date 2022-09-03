@@ -43,6 +43,43 @@ const queue: Array<{started: boolean, info: any}> = []
 if (!fs.existsSync(path.join(__dirname, "data"))) fs.mkdirSync(path.join(__dirname, "data"))
 fs.writeFileSync(path.join(__dirname, "data/Helvetica.afm"), Helvetica)
 
+ipcMain.handle("rename", async (event, files: string[]) => {
+  const directoryName = path.basename(path.dirname(files[0]))
+
+  const fileNames = files.map((f) => path.basename(f, path.extname(f)))
+
+  let renamed = false 
+  for (let i = 0; i < fileNames.length; i++) {
+    const regex = new RegExp(`(?<=${directoryName}) (.*?) (?=.)`, "gi")
+    const bit = fileNames[i].match(regex)?.[0].trim()
+    if (!bit) continue
+    let newFilename = ""
+    if (/\d+/.test(bit)) {
+      newFilename = `${directoryName} ${Number(bit.match(/\d+/)?.[0])}`
+    } else {
+      let badBit = false
+      for (let j = 0; j < fileNames.length; j++) {
+        const testBit = fileNames[j].match(regex)?.[0].trim()
+        if (`${directoryName} ${bit}` === `${directoryName} ${testBit}`) badBit = true
+      }
+      if (badBit) break
+      newFilename = `${directoryName} ${bit}`
+    }
+    const newPath = path.join(path.dirname(files[i]), `${newFilename}${path.extname(files[i])}`)
+    fs.renameSync(files[i], newPath)
+    renamed = true
+  }
+
+  if (!renamed) {
+    files = files.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
+    for (let i = 0; i < files.length; i++) {
+      const newPath = path.join(path.dirname(files[i]), `${directoryName} - ${i + 1}${path.extname(files[i])}`)
+      fs.renameSync(files[i], newPath)
+    }
+  }
+  shell.openPath(path.dirname(files[0]))
+})
+
 const extractCover = async (dir: string, images: string[]) => {
   images = images.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
   fs.writeFileSync(`${path.dirname(dir)}/${path.basename(dir, path.extname(dir))}.jpg`, fs.readFileSync(images[0]))
@@ -169,12 +206,15 @@ ipcMain.handle("pdf", async (event, files: string[]) => {
   shell.openPath(path.dirname(openDir))
 })
 
-ipcMain.handle("pdf-images", async (event, cover?: boolean) => {
+ipcMain.handle("pdf-images", async (event, cover?: boolean, rename?: boolean) => {
+  let title = "Convert or Extract PDF"
+  if (cover) title = "PDF or Image Directory Cover"
+  if (rename) title = "Rename by Directory"
   if (!window) return
   const result = await dialog.showOpenDialog(window, {
     properties: ["openFile", "openDirectory", "multiSelections"],
     buttonLabel: "Convert",
-    title: cover ? "PDF or Image Directory Cover" : "Convert or Extract PDF"
+    title
   })
   return result.filePaths
 })
