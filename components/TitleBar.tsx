@@ -25,6 +25,8 @@ import coverButton from "../assets/icons/cover.png"
 import coverButtonHover from "../assets/icons/cover-hover.png"
 import renameButton from "../assets/icons/rename.png"
 import renameButtonHover from "../assets/icons/rename-hover.png"
+import mkvButton from "../assets/icons/mkv.png"
+import mkvButtonHover from "../assets/icons/mkv-hover.png"
 import "../styles/titlebar.less"
 
 const TitleBar: React.FunctionComponent = (props) => {
@@ -39,6 +41,7 @@ const TitleBar: React.FunctionComponent = (props) => {
     const [hoverPDF, setHoverPDF] = useState(false)
     const [hoverCover, setHoverCover] = useState(false)
     const [hoverRename, setHoverRename] = useState(false)
+    const [hoverMKV, setHoverMKV] = useState(false)
     const [theme, setTheme] = useState("light")
 
     useEffect(() => {
@@ -81,18 +84,23 @@ const TitleBar: React.FunctionComponent = (props) => {
     }
     
     const pdf = async () => {
-        const images = await ipcRenderer.invoke("pdf-images")
-        if (images?.[0]) ipcRenderer.invoke("pdf", images)
+        const files = await ipcRenderer.invoke("multi-open")
+        if (files?.[0]) ipcRenderer.invoke("pdf", files)
     }
 
     const cover = async () => {
-        const images = await ipcRenderer.invoke("pdf-images", true)
-        if (images?.[0]) ipcRenderer.invoke("pdf-cover", images)
+        const files = await ipcRenderer.invoke("multi-open", "cover")
+        if (files?.[0]) ipcRenderer.invoke("pdf-cover", files)
     }
 
     const rename = async () => {
-        const images = await ipcRenderer.invoke("pdf-images", false, true)
-        if (images?.[0]) ipcRenderer.invoke("rename", images)
+        const files = await ipcRenderer.invoke("multi-open", "rename")
+        if (files?.[0]) ipcRenderer.invoke("rename", files)
+    }
+
+    const mkv = async () => {
+        const files = await ipcRenderer.invoke("multi-open", "subs")
+        if (files?.[0]) ipcRenderer.invoke("extract-subtitles", files)
     }
 
     const changeTheme = (value?: string) => {
@@ -135,6 +143,7 @@ const TitleBar: React.FunctionComponent = (props) => {
                     </div>
                     <div className="title-bar-buttons">
                     <img src={hoverTheme ? (theme === "light" ? darkButtonHover : lightButtonHover) : (theme === "light" ? darkButton : lightButton)} height="20" width="20" className="title-bar-button theme-button" onClick={() => changeTheme()} onMouseEnter={() => setHoverTheme(true)} onMouseLeave={() => setHoverTheme(false)}/>
+                        <img src={hoverMKV ? mkvButtonHover : mkvButton} height="20" width="20" className="title-bar-button mkv-button" onClick={mkv} onMouseEnter={() => setHoverMKV(true)} onMouseLeave={() => setHoverMKV(false)}/>
                         <img src={hoverRename ? renameButtonHover : renameButton} height="20" width="20" className="title-bar-button rename-button" onClick={rename} onMouseEnter={() => setHoverRename(true)} onMouseLeave={() => setHoverRename(false)}/>
                         <img src={hoverCover ? coverButtonHover : coverButton} height="20" width="20" className="title-bar-button cover-button" onClick={cover} onMouseEnter={() => setHoverCover(true)} onMouseLeave={() => setHoverCover(false)}/>
                         <img src={hoverPDF ? pdfButtonHover : pdfButton} height="20" width="20" className="title-bar-button pdf-button" onClick={pdf} onMouseEnter={() => setHoverPDF(true)} onMouseLeave={() => setHoverPDF(false)}/>

@@ -21,6 +21,8 @@ import sharp from "sharp"
 import Helvetica from "pdfkit/js/data/Helvetica.afm"
 import PDFDocument from "pdfkit"
 import child_process from "child_process"
+import mkvExtractor from "mkv-subtitle-extractor"
+
 import util from "util"
 
 const exec = util.promisify(child_process.exec)
@@ -42,6 +44,47 @@ const queue: Array<{started: boolean, info: any}> = []
 
 if (!fs.existsSync(path.join(__dirname, "data"))) fs.mkdirSync(path.join(__dirname, "data"))
 fs.writeFileSync(path.join(__dirname, "data/Helvetica.afm"), Helvetica)
+
+const extractSubtitles = async (videos: string[]) => {
+  for (let i = 0; i < videos.length; i++) {
+    await mkvExtractor(videos[i])
+  }
+
+  const promiseArray: any[] = []
+  for (let i = 0; i < videos.length; i++) {
+    promiseArray.push(new Promise<void>((resolve) => {
+      fs.unlink(videos[i], () => resolve())
+    }))
+  }
+
+  await Promise.all(promiseArray)
+}
+
+ipcMain.handle("extract-subtitles", async (event, files: string[]) => {
+  const directories = files.filter((f) => fs.lstatSync(f).isDirectory())
+  const videos = files.filter((f) => path.extname(f).toLowerCase() === ".mkv")
+
+  let openDir = ""
+
+  for (let i = 0; i < directories.length; i++) {
+    const dir = directories[i]
+    let videos = fs.readdirSync(dir).map((i) => path.join(dir, i))
+    videos = videos.filter((f) => path.extname(f).toLowerCase() === ".mkv")
+    await extractSubtitles(videos)
+    try {
+      fs.rmdirSync(dir)
+    } catch (e) {
+      console.log(e)
+    }
+    if (!openDir) openDir = directories[0]
+  }
+
+  if (videos.length) {
+    await extractSubtitles(videos)
+    if (!openDir) openDir = videos[0]
+  }
+  shell.openPath(path.dirname(openDir))
+})
 
 ipcMain.handle("rename", async (event, files: string[]) => {
   const directoryName = path.basename(path.dirname(files[0]))
@@ -206,14 +249,22 @@ ipcMain.handle("pdf", async (event, files: string[]) => {
   shell.openPath(path.dirname(openDir))
 })
 
-ipcMain.handle("pdf-images", async (event, cover?: boolean, rename?: boolean) => {
+ipcMain.handle("multi-open", async (event, type?: string) => {
   let title = "Convert or Extract PDF"
-  if (cover) title = "PDF or Image Directory Cover"
-  if (rename) title = "Rename by Directory"
+  let button = "Convert"
+  if (type === "cover") title = "PDF or Image Directory Cover"
+  if (type === "rename") {
+    title = "Rename by Directory"
+    button = "Rename"
+  }
+  if (type === "subs") {
+    title = "Extract Subtitles"
+    button = "Extract"
+  }
   if (!window) return
   const result = await dialog.showOpenDialog(window, {
     properties: ["openFile", "openDirectory", "multiSelections"],
-    buttonLabel: rename ? "Rename" : "Convert",
+    buttonLabel: button,
     title
   })
   return result.filePaths

@@ -9,7 +9,7 @@ declare module "sharp-phash"
 declare module "sharp-phash/distance"
 declare module "image-pixels"
 declare module "bing-translate-api"
-declare module "pdf-poppler"
+declare module "mkv-subtitle-extractor"
 
 type OpenImageProps = {
     label: string
