@@ -73,7 +73,7 @@ ipcMain.handle("rename", async (event, files: string[]) => {
   if (!renamed) {
     files = files.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
     for (let i = 0; i < files.length; i++) {
-      const newPath = path.join(path.dirname(files[i]), `${directoryName} - ${i + 1}${path.extname(files[i])}`)
+      const newPath = path.join(path.dirname(files[i]), `${directoryName} ${i + 1}${path.extname(files[i])}`)
       fs.renameSync(files[i], newPath)
     }
   }
@@ -121,14 +121,14 @@ const createPDF = async (dir: string, images: string[]) => {
 ipcMain.handle("pdf-cover", async (event, files: string[]) => {
   const directories = files.filter((f) => fs.lstatSync(f).isDirectory())
   const PDFs = files.filter((f) => path.extname(f) === ".pdf")
-  const images = files.filter((f) => path.extname(f) === ".jpg" || path.extname(f) === ".png" || path.extname(f) === ".jpeg")
+  const images = files.filter((f) => path.extname(f).toLowerCase() === ".jpg" || path.extname(f).toLowerCase() === ".png" || path.extname(f).toLowerCase() === ".jpeg")
 
   let openDir = ""
 
   for (let i = 0; i < directories.length; i++) {
     const dir = directories[i]
     let images = fs.readdirSync(dir).map((i) => path.join(dir, i))
-    images = images.filter((f) => path.extname(f) === ".jpg" || path.extname(f) === ".png" || path.extname(f) === ".jpeg")
+    images = images.filter((f) => path.extname(f).toLowerCase() === ".jpg" || path.extname(f).toLowerCase() === ".png" || path.extname(f).toLowerCase() === ".jpeg")
     await extractCover(dir, images)
     try {
       fs.rmdirSync(dir)
@@ -148,7 +148,7 @@ ipcMain.handle("pdf-cover", async (event, files: string[]) => {
     .then(async () => {
       fs.unlinkSync(PDFs[i])
       let images = fs.readdirSync(savePath).map((i) => path.join(savePath, i))
-      images = images.filter((f) => path.extname(f) === ".jpg" || path.extname(f) === ".png" || path.extname(f) === ".jpeg")
+      images = images.filter((f) => path.extname(f).toLowerCase() === ".jpg" || path.extname(f).toLowerCase() === ".png" || path.extname(f).toLowerCase() === ".jpeg")
       await extractCover(savePath, images)
       try {
         fs.rmdirSync(savePath)
@@ -170,14 +170,14 @@ ipcMain.handle("pdf-cover", async (event, files: string[]) => {
 ipcMain.handle("pdf", async (event, files: string[]) => {
   const directories = files.filter((f) => fs.lstatSync(f).isDirectory())
   const PDFs = files.filter((f) => path.extname(f) === ".pdf")
-  const images = files.filter((f) => path.extname(f) === ".jpg" || path.extname(f) === ".png" || path.extname(f) === ".jpeg")
+  const images = files.filter((f) => path.extname(f).toLowerCase() === ".jpg" || path.extname(f).toLowerCase() === ".png" || path.extname(f).toLowerCase() === ".jpeg")
 
   let openDir = ""
 
   for (let i = 0; i < directories.length; i++) {
     const dir = directories[i]
     let images = fs.readdirSync(dir).map((i) => path.join(dir, i))
-    images = images.filter((f) => path.extname(f) === ".jpg" || path.extname(f) === ".png" || path.extname(f) === ".jpeg")
+    images = images.filter((f) => path.extname(f).toLowerCase() === ".jpg" || path.extname(f).toLowerCase() === ".png" || path.extname(f).toLowerCase() === ".jpeg")
     await createPDF(dir, images)
     try {
       fs.rmdirSync(dir)
