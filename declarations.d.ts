@@ -10,6 +10,7 @@ declare module "sharp-phash/distance"
 declare module "image-pixels"
 declare module "bing-translate-api"
 declare module "mkv-subtitle-extractor"
+declare module "srt-to-vtt"
 
 type OpenImageProps = {
     label: string

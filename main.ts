@@ -22,6 +22,7 @@ import Helvetica from "pdfkit/js/data/Helvetica.afm"
 import PDFDocument from "pdfkit"
 import child_process from "child_process"
 import mkvExtractor from "mkv-subtitle-extractor"
+import srt2vtt from "srt-to-vtt"
 
 import util from "util"
 
@@ -45,6 +46,26 @@ const queue: Array<{started: boolean, info: any}> = []
 if (!fs.existsSync(path.join(__dirname, "data"))) fs.mkdirSync(path.join(__dirname, "data"))
 fs.writeFileSync(path.join(__dirname, "data/Helvetica.afm"), Helvetica)
 
+const srtToVtt = async (subtitles: string[]) => {
+  for (let i = 0; i < subtitles.length; i++) {
+    await new Promise<void>((resolve, reject) => {
+      const readStream =  fs.createReadStream(subtitles[i]).pipe(srt2vtt())
+      const writeStream = fs.createWriteStream(`${path.dirname(subtitles[i])}/${path.basename(subtitles[i], path.extname(subtitles[i]))}.vtt`)
+      readStream.pipe(writeStream)
+          .on("end", () => resolve())
+          .on("finish", () => resolve())
+    })
+  }
+
+  const promiseArray: any[] = []
+  for (let i = 0; i < subtitles.length; i++) {
+    promiseArray.push(new Promise<void>((resolve) => {
+      fs.unlink(subtitles[i], () => resolve())
+    }))
+  }
+  await Promise.all(promiseArray)
+}
+
 const extractSubtitles = async (videos: string[]) => {
   for (let i = 0; i < videos.length; i++) {
     await mkvExtractor(videos[i])
@@ -63,14 +84,24 @@ const extractSubtitles = async (videos: string[]) => {
 ipcMain.handle("extract-subtitles", async (event, files: string[]) => {
   const directories = files.filter((f) => fs.lstatSync(f).isDirectory())
   const videos = files.filter((f) => path.extname(f).toLowerCase() === ".mkv")
+  const subtitles = files.filter((f) => path.extname(f).toLowerCase() === ".srt")
 
   let openDir = ""
 
   for (let i = 0; i < directories.length; i++) {
     const dir = directories[i]
-    let videos = fs.readdirSync(dir).map((i) => path.join(dir, i))
-    videos = videos.filter((f) => path.extname(f).toLowerCase() === ".mkv")
-    await extractSubtitles(videos)
+    let files = fs.readdirSync(dir).map((i) => path.join(dir, i))
+    let videos = files.filter((f) => path.extname(f).toLowerCase() === ".mkv")
+    let subs = files.filter((f) => path.extname(f).toLowerCase() === ".srt")
+    if (videos.length) {
+      await extractSubtitles(videos)
+      let files = fs.readdirSync(dir).map((i) => path.join(dir, i))
+      let subs = files.filter((f) => path.extname(f).toLowerCase() === ".srt")
+      await srtToVtt(subs)
+    }
+    if (subs.length) {
+      await srtToVtt(subs)
+    }
     try {
       fs.rmdirSync(dir)
     } catch (e) {
@@ -81,7 +112,15 @@ ipcMain.handle("extract-subtitles", async (event, files: string[]) => {
 
   if (videos.length) {
     await extractSubtitles(videos)
+    let subs = fs.readdirSync(path.dirname(videos[0])).map((i) => path.join(path.dirname(videos[0]), i))
+    subs = subs.filter((f) => path.extname(f).toLowerCase() === ".srt")
+    await srtToVtt(subs)
     if (!openDir) openDir = videos[0]
+  }
+
+  if (subtitles.length) {
+    await srtToVtt(subtitles)
+    if (!openDir) openDir = subtitles[0]
   }
   shell.openPath(path.dirname(openDir))
 })
