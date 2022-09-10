@@ -226,7 +226,7 @@ ipcMain.handle("pdf-cover", async (event, files: string[]) => {
     const savePath = path.join(dir, saveFilename)
     if (!fs.existsSync(savePath)) fs.mkdirSync(savePath)
     const pdfimages = popplerPath ? popplerPath : "pdfimages"
-    exec(`cd "${savePath}" && "${pdfimages}" -j -q "${PDFs[i]}" "${saveFilename}"`)
+    exec(`cd "${savePath}" && "${pdfimages}" -png -j -q "${PDFs[i]}" "${saveFilename}"`)
     .then(async () => {
       fs.unlinkSync(PDFs[i])
       let images = fs.readdirSync(savePath).map((i) => path.join(savePath, i))
