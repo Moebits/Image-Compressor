@@ -297,8 +297,8 @@ ipcMain.handle("multi-open", async (event, type?: string) => {
     button = "Rename"
   }
   if (type === "subs") {
-    title = "Extract Subtitles"
-    button = "Extract"
+    title = "Convert to VTT Subtitles"
+    button = "Convert"
   }
   if (!window) return
   const result = await dialog.showOpenDialog(window, {
@@ -312,7 +312,8 @@ ipcMain.handle("multi-open", async (event, type?: string) => {
 const subFiles = (directory: string) => {
   let files: string[] = []
   let directories: string[] = []
-  const dirFiles = fs.readdirSync(directory).map((f) => `${directory}/${f}`)
+  let dirFiles = fs.readdirSync(directory).map((f) => `${directory}/${f}`)
+  dirFiles = dirFiles.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
   for (let i = 0; i < dirFiles.length; i++) {
     if (fs.lstatSync(dirFiles[i]).isDirectory()) {
       directories.push(dirFiles[i])
@@ -328,9 +329,25 @@ const subFiles = (directory: string) => {
 
 ipcMain.handle("flatten", async (event, directory: string) => {
   const {files, directories} = subFiles(directory)
+  let conflict = false 
+  loop1:
   for (let i = 0; i < files.length; i++) {
-    const newName = `${directory}/${path.basename(files[i])}`
+    let newName = path.basename(files[i])
+    for (let j = 0; j < files.length; j++) { 
+      if (`${path.dirname(files[i])}/${path.basename(files[i])}` === `${path.dirname(files[j])}/${path.basename(files[j])}`) continue
+      let checkName = path.basename(files[j])
+      if (newName === checkName) {
+        conflict = true
+        break loop1
+      }
+    }
+  }
+  let renameIndex = 0
+  for (let i = 0; i < files.length; i++) {
+    let newName = `${directory}/${path.basename(files[i])}`
+    if (conflict) newName = `${directory}/${renameIndex}_${path.basename(files[i])}`
     fs.renameSync(files[i], newName)
+    renameIndex++
   }
   for (let i = 0; i < directories.length; i++) {
     fs.rmdirSync(directories[i])
