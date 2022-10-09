@@ -28,6 +28,25 @@ You can customize the output names. If it results in a blank name (eg. not found
 {width} - The destination width. \
 {height} - The destination height.
 
+### Titlebar Buttons
+There are many utility functions on the titlebar. They do the following:
+
+VTT - If ASS or SRT files are selected, they will be converted to a VTT file. If MKV videos are selected, the subtitles are
+extracted and converted to VTT. If a directory is selected, all MKV, ASS, and SRT files are converted in that directory. The original files are deleted.
+
+Rename - Select files within a directory and they are renamed according to the name of the directory. For example, if the directory is named 
+"Yuru Yuri" the files will be renamed "Yuru Yuri 1", "Yuru Yuri 2", etc. going by alphabetic order.
+
+Image Cover - If PDF files are selected, it extracts the first image (the cover image). If a directory is selected, it converts all double
+pages to single pages (images with twice the width of all others). If images are selected, it converts all double pages to singles - if all images are the same width,
+they are all treated as double pages. All original files are deleted.
+
+PDF -  If PDF files are selected, it converts it into a directory of images. If directories or images are selected, it converts them into PDF files. Sometimes the first function results in PPM image files, if you select PPM files they will be converted to JPG files.
+
+Flatten - Flattens a directory, meaning that all files in all sub-directories are moved to the top level and the sub-directories are removed. This
+attempts to prevent naming conflicts by renaming files if the name would conflict with another.
+
+
 ### Keyboard Shortcuts
 - Ctrl O - Open images
 - Drag and drop - Open images
