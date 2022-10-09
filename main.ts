@@ -47,6 +47,70 @@ const queue: Array<{started: boolean, info: any}> = []
 if (!fs.existsSync(path.join(__dirname, "data"))) fs.mkdirSync(path.join(__dirname, "data"))
 fs.writeFileSync(path.join(__dirname, "data/Helvetica.afm"), Helvetica)
 
+const removeDoubles = async (images: string[], dontProcessAll?: boolean) => {
+  images = images.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
+
+  let doubleImages: string[] = []
+  let widthMap = {} as any 
+
+  for (let i = 0; i < images.length; i++) {
+    const metadata = await sharp(images[i]).metadata()
+    const width = metadata.width || 0
+    if (widthMap[width]) {
+      widthMap[width] += 1
+    } else {
+      widthMap[width] = 1
+    }
+  }
+
+  let commonWidth = 0
+  let freq = 0
+  for (let i = 0; i < Object.keys(widthMap).length; i++) {
+    const key = Object.keys(widthMap)[i]
+    const value = Object.values(widthMap)[i]
+    if (freq < Number(value)) {
+      freq = Number(value) 
+      commonWidth = Number(key)
+    }
+  }
+
+  for (let i = 0; i < images.length; i++) {
+    const metadata = await sharp(images[i]).metadata()
+    const width = metadata.width || 0
+    if (width > commonWidth * 1.5) {
+      doubleImages.push(images[i])
+    }
+  }
+
+  // If all images have the same width, treat all of them as doubles 
+  if (!doubleImages.length) {
+    if (!dontProcessAll) doubleImages = images
+  }
+
+  for (let i = 0; i < doubleImages.length; i++) {
+    const metadata = await sharp(doubleImages[i]).metadata()
+    const width = metadata.width || 0
+    const height = metadata.height || 0
+    const newWidth = Math.floor(width / 2)
+    const page1 = `${path.dirname(doubleImages[i])}/${path.basename(doubleImages[i], path.extname(doubleImages[i]))}.1${path.extname(doubleImages[i])}`
+    const page2 = `${path.dirname(doubleImages[i])}/${path.basename(doubleImages[i], path.extname(doubleImages[i]))}.2${path.extname(doubleImages[i])}`
+    await sharp(doubleImages[i])
+        .extract({left: newWidth, top: 0, width: newWidth, height: height})
+        .toFile(page1)
+    await sharp(doubleImages[i])
+        .extract({left: 0, top: 0, width: newWidth, height: height})
+        .toFile(page2)
+  }
+
+  const promiseArray: any[] = []
+  for (let i = 0; i < doubleImages.length; i++) {
+    promiseArray.push(new Promise<void>((resolve) => {
+      fs.unlink(doubleImages[i], () => resolve())
+    }))
+  }
+  await Promise.all(promiseArray)
+}
+
 ipcMain.handle("remove-duplicate-subs", async (event, files: string[]) => {
   for (let i = 0; i < files.length; i++) {
     const content = fs.readFileSync(files[i]).toString().split("\n")
@@ -264,19 +328,6 @@ ipcMain.handle("pdf-cover", async (event, files: string[]) => {
 
   let openDir = ""
 
-  for (let i = 0; i < directories.length; i++) {
-    const dir = directories[i]
-    let images = fs.readdirSync(dir).map((i) => path.join(dir, i))
-    images = images.filter((f) => path.extname(f).toLowerCase() === ".jpg" || path.extname(f).toLowerCase() === ".png" || path.extname(f).toLowerCase() === ".jpeg")
-    await extractCover(dir, images)
-    try {
-      fs.rmdirSync(dir)
-    } catch (e) {
-      console.log(e)
-    }
-    if (!openDir) openDir = directories[0]
-  }
-
   for (let i = 0; i < PDFs.length; i++) {
     const dir = path.dirname(PDFs[i])
     const saveFilename = path.basename(PDFs[i], path.extname(PDFs[i]))
@@ -299,8 +350,16 @@ ipcMain.handle("pdf-cover", async (event, files: string[]) => {
     if (!openDir) openDir = PDFs[0]
   }
 
+  for (let i = 0; i < directories.length; i++) {
+    const dir = directories[i]
+    let images = fs.readdirSync(dir).map((i) => path.join(dir, i))
+    images = images.filter((f) => path.extname(f).toLowerCase() === ".jpg" || path.extname(f).toLowerCase() === ".png" || path.extname(f).toLowerCase() === ".jpeg")
+    await removeDoubles(images, true)
+    if (!openDir) openDir = images[0]
+  }
+
   if (images.length) {
-    await extractCover(images[0], images)
+    await removeDoubles(images)
     if (!openDir) openDir = images[0]
   }
   shell.openPath(path.dirname(openDir))
