@@ -100,6 +100,7 @@ const TitleBar: React.FunctionComponent = (props) => {
 
     const vtt = async () => {
         const files = await ipcRenderer.invoke("multi-open", "subs")
+        //if (files?.[0]) ipcRenderer.invoke("remove-duplicate-subs", files)
         if (files?.[0]) ipcRenderer.invoke("extract-subtitles", files)
     }
 

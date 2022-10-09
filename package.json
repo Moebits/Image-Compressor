@@ -160,6 +160,8 @@
   },
   "dependencies": {
     "@electron/remote": "^2.0.1",
+    "ass-to-srt": "^1.2.1",
+    "ass-to-vtt": "^1.2.0",
     "bing-translate-api": "^2.2.1",
     "bootstrap": "^4.6.0",
     "electron-shortcuts": "^0.4.0",
