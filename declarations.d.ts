@@ -13,6 +13,7 @@ declare module "mkv-subtitle-extractor"
 declare module "srt-to-vtt"
 declare module "ass-to-vtt"
 declare module "ass-to-srt"
+declare module "imagemin-pngquant"
 
 type OpenImageProps = {
     label: string
