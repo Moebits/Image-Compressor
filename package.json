@@ -13,6 +13,7 @@
     "release:win": "npm run clean ./build && webpack && npm run sharp:win && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder -w -p always",
     "release:linux": "npm run clean ./build && webpack && npm run sharp:linux && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder -l -p always",
     "sharp:mac": "del-cli ./node_modules/sharp && npm install --platform=darwin --arch=arm64 sharp",
+    "sharp:mac64": "del-cli ./node_modules/sharp && npm install --platform=darwin --arch=x64 sharp",
     "sharp:win": "del-cli ./node_modules/sharp && npm install --platform=win32 --arch=x64 sharp",
     "sharp:linux": "del-cli ./node_modules/sharp && npm install --platform=linux --arch=x64 sharp"
   },
@@ -42,11 +43,12 @@
     "mac": {
       "target": {
         "target": "dmg",
-        "arch": "x64"
+        "arch": "arm64"
       },
       "category": "public.app-category.utilities",
       "extraFiles": [
-        "poppler/mac/**"
+        "poppler/mac/**",
+        "data/**"
       ],
       "extraResources": [
         {
@@ -81,7 +83,8 @@
         "arch": "x64"
       },
       "extraFiles": [
-        "poppler/windows/**"
+        "poppler/windows/**",
+        "data/**"
       ],
       "files": [
         "vendor/cjpeg.exe",
@@ -116,7 +119,10 @@
       "dist/**/*",
       "package.json"
     ],
-    "asar": false,
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/**/*.node"
+    ],
     "publish": {
       "provider": "github",
       "repo": "Image-Compressor",
@@ -154,6 +160,7 @@
     "node-loader": "^1.0.2",
     "raw-loader": "^4.0.2",
     "terser-webpack-plugin": "^5.1.1",
+    "transform-loader": "^0.2.4",
     "ts-loader": "^9.2.6",
     "typescript": "^4.4.4",
     "wasm-loader": "^1.3.0",
@@ -163,6 +170,7 @@
   },
   "dependencies": {
     "@electron/remote": "^2.1.2",
+    "@react-pdf/pdfkit": "^3.1.2",
     "ass-to-srt": "^1.2.1",
     "ass-to-vtt": "^1.2.0",
     "bing-translate-api": "^2.2.1",
@@ -180,7 +188,6 @@
     "imagemin-pngquant": "^9.0.2",
     "imagemin-webp": "^8.0.0",
     "mkv-subtitle-extractor": "^1.1.1",
-    "pdfkit": "^0.13.0",
     "rc-slider": "^9.7.4",
     "react": "^18.2.0",
     "react-bootstrap": "^1.4.3",

@@ -19,7 +19,7 @@ import dist from "sharp-phash/distance"
 import sharp from "sharp"
 // @ts-ignore
 import Helvetica from "pdfkit/js/data/Helvetica.afm"
-import PDFDocument from "pdfkit"
+import PDFDocument from "@react-pdf/pdfkit"
 import child_process from "child_process"
 import mkvExtractor from "mkv-subtitle-extractor"
 import srt2vtt from "srt-to-vtt"
@@ -37,15 +37,15 @@ let popplerPath = undefined as any
 if (process.platform === "darwin") popplerPath = path.join(app.getAppPath(), "../../poppler/mac/bin/pdfimages")
 if (process.platform === "win32") popplerPath = path.join(app.getAppPath(), "../../poppler/windows/bin/pdfimages.exe") 
 if (!fs.existsSync(popplerPath)) popplerPath = undefined
+let pnmPath = undefined as any
+if (process.platform === "darwin") pnmPath = path.join(app.getAppPath(), "../../poppler/mac/bin/pnmtojpeg")
+if (process.platform === "win32") pnmPath = path.join(app.getAppPath(), "../../poppler/windows/bin/pnmtojpeg.exe") 
 autoUpdater.autoDownload = false
 const store = new Store()
 
 const history: Array<{id: number, source: string, dest?: string}> = []
 const active: Array<{id: number, source: string, dest: string, action: null | "stop"}> = []
 const queue: Array<{started: boolean, info: any}> = []
-
-if (!fs.existsSync(path.join(__dirname, "data"))) fs.mkdirSync(path.join(__dirname, "data"))
-fs.writeFileSync(path.join(__dirname, "data/Helvetica.afm"), Helvetica)
 
 const removeDoubles = async (images: string[], dontProcessAll?: boolean) => {
   images = images.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
@@ -137,8 +137,9 @@ ipcMain.handle("remove-duplicate-subs", async (event, files: string[]) => {
 })
 
 const ppmToJpeg = async (files: string[]) => {
+  const pnmtojpeg = pnmPath ? pnmPath : "pnmtojpeg"
   for (let i = 0; i < files.length; i++) {
-    await exec(`pnmtojpeg "${files[i]}" > "${path.dirname(files[i])}/${path.basename(files[i], path.extname(files[i]))}.jpg"`)
+    await exec(`"${pnmtojpeg}" "${files[i]}" > "${path.dirname(files[i])}/${path.basename(files[i], path.extname(files[i]))}.jpg"`)
   }
 
   const promiseArray: any[] = []
@@ -1005,10 +1006,10 @@ if (!singleLock) {
         fs.chmodSync(path.join(__dirname, "../vendor/gifsicle"), "777")
         fs.chmodSync(path.join(__dirname, "../vendor/pngquant"), "777")
       } else {
-        fs.chmodSync(path.join(app.getAppPath(), "vendor/cjpeg"), "777")
-        fs.chmodSync(path.join(app.getAppPath(), "vendor/cwebp"), "777")
-        fs.chmodSync(path.join(app.getAppPath(), "vendor/gifsicle"), "777")
-        fs.chmodSync(path.join(app.getAppPath(), "vendor/pngquant"), "777")
+        fs.chmodSync(path.join(app.getAppPath(), "../app/vendor/cjpeg"), "777")
+        fs.chmodSync(path.join(app.getAppPath(), "../app/vendor/cwebp"), "777")
+        fs.chmodSync(path.join(app.getAppPath(), "../app/vendor/gifsicle"), "777")
+        fs.chmodSync(path.join(app.getAppPath(), "../app/vendor/pngquant"), "777")
       }
     }
     window.on("close", () => {
