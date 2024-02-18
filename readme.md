@@ -55,6 +55,13 @@ attempts to prevent naming conflicts by renaming files if the name would conflic
 
 Download the installer from the [releases](https://github.com/Tenpi/Image-Compressor/releases) tab.
 
+### MacOS
+
+On MacOS unsigned applications won't open, run this to remove the quarantine flag.
+```
+xattr -d com.apple.quarantine /Applications/Image\ Compressor.app
+```
+
 ### Bugs and Requests
 
 Open an issue on my GitHub repository. 
