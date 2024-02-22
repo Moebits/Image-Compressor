@@ -246,4 +246,52 @@ export default class Functions {
     public static bufferToBase64 = (buffer: Buffer, type: string) => {
         return `data:${type};base64,${buffer.toString("base64")}`
     }
+
+    public static ass2vtt = (ass: string) => {
+        const parseTime = (timeString: string) => {
+            const parts = timeString.split(":").map(parseFloat)
+            let seconds = parts[0] * 3600 + parts[1] * 60 + parts[2] as any
+            const hours = Math.floor(seconds / 3600)
+            seconds %= 3600
+            const minutes = Math.floor(seconds / 60)
+            seconds %= 60
+            seconds = seconds.toFixed(3)
+            return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(6, "0")}`
+        }
+      
+        const lines = ass.split("\n")
+        const newLines = ["WEBVTT"]
+      
+        const styles = []
+        const styleKeys = ["Name", "Fontname", "Fontsize", "PrimaryColour", "SecondaryColour", 
+                      "OutlineColour", "BackColour", "Bold", "Italic", "Underline", "Strikeout", 
+                      "ScaleX", "ScaleY", "Spacing", "Angle", "BorderStyle", "Outline", "Shadow", 
+                      "Alignment", "MarginL", "MarginR", "MarginV", "Encoding"]
+        const dialogueKeys = ["Layer", "Start", "End", "Style", "Name", "MarginL", "MarginR", "MarginV", "Effect", "Text"]
+        let counter = 1
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i]
+            if (lines[i].startsWith("Style")) {
+                const values = lines[i].replace("Style: ", "").split(",")
+                let obj = {} as any
+                for (let j = 0; j < values.length; j++) {
+                    obj[styleKeys[j]] = values[j]
+                }
+                styles.push(obj)
+            }
+            if (lines[i].startsWith("Dialogue")) {
+                let values = lines[i].replace("Dialogue: ", "").split(",")
+                values = values.slice(0, 9).concat(values.slice(9).join(' '))
+                let obj = {} as any
+                for (let j = 0; j < values.length; j++) {
+                    obj[dialogueKeys[j]] = values[j]
+                }
+                //const styling = styles.find((s) => s.Name === obj.Style)
+                let text = obj.Text.replace(/\\N/g, "\n").replace(/\{.*?\}/g, "").trim()
+                const line = `\n${counter++}\n${parseTime(obj.Start)} --> ${parseTime(obj.End)}\n${text}`
+                newLines.push(line)
+            }
+        }
+        return newLines.join("\n")
+      }
 }

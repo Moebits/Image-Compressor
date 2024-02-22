@@ -1,6 +1,6 @@
 {
   "name": "image-compressor",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "description": "Compresses, resizes, and renames images.",
   "main": "dist/main.js",
   "scripts": {
@@ -47,8 +47,7 @@
       },
       "category": "public.app-category.utilities",
       "extraFiles": [
-        "poppler/mac/**",
-        "data/**"
+        "poppler/mac/**"
       ],
       "extraResources": [
         {
@@ -83,8 +82,7 @@
         "arch": "x64"
       },
       "extraFiles": [
-        "poppler/windows/**",
-        "data/**"
+        "poppler/windows/**"
       ],
       "files": [
         "vendor/cjpeg.exe",
@@ -187,6 +185,7 @@
     "imagemin-mozjpeg": "^10.0.0",
     "imagemin-pngquant": "^9.0.2",
     "imagemin-webp": "^8.0.0",
+    "images-meta": "github:Tenpi/images-meta",
     "mkv-subtitle-extractor": "^1.1.1",
     "rc-slider": "^9.7.4",
     "react": "^18.2.0",

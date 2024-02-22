@@ -14,6 +14,7 @@ import imageminMozjpeg from "imagemin-mozjpeg"
 import imageminGifsicle from "imagemin-gifsicle"
 import imageminWebp from "imagemin-webp"
 import imageminPngquant from "imagemin-pngquant"
+import imagesMeta from "images-meta"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
 import sharp from "sharp"
@@ -158,11 +159,10 @@ const subToVtt = async (subtitles: string[]): Promise<any> => {
     await new Promise<void>((resolve, reject) => {
 
       if (path.extname(subtitles[i]) === ".ass") {
-        const srt = ass2srt(fs.readFileSync(subtitles[i]))
-        const srtDest = `${path.dirname(subtitles[i])}/${path.basename(subtitles[i], path.extname(subtitles[i]))}.srt`
-        fs.writeFileSync(srtDest, srt)
-        srtSubs.push(srtDest)
-        resolve()
+        const vtt = functions.ass2vtt(fs.readFileSync(subtitles[i]).toString())
+        const vttDest = `${path.dirname(subtitles[i])}/${path.basename(subtitles[i], path.extname(subtitles[i]))}.vtt`
+        fs.writeFileSync(vttDest, vtt)
+        return resolve()
       }
 
       const readStream =  fs.createReadStream(subtitles[i])
@@ -498,7 +498,7 @@ ipcMain.handle("zoom-in", () => {
 
 const openPreview = async () => {
   if (!preview) {
-    preview = new BrowserWindow({width: 800, height: 600, minWidth: 720, minHeight: 450, frame: false, backgroundColor: "#181818", center: false, webPreferences: {nodeIntegration: true, contextIsolation: false, enableRemoteModule: true}})
+    preview = new BrowserWindow({width: 800, height: 600, minWidth: 720, minHeight: 450, frame: false, backgroundColor: "#181818", center: false, webPreferences: {nodeIntegration: true, contextIsolation: false}})
     await preview.loadFile(path.join(__dirname, "preview.html"))
     require("@electron/remote/main").enable(preview.webContents)
     preview?.on("closed", () => {
@@ -674,8 +674,18 @@ const compress = async (info: any) => {
   if (historyIndex !== -1) history[historyIndex].dest = dest
   const activeIndex = active.findIndex((a) => a.id === info.id)
   if (activeIndex !== -1) active[activeIndex].dest = dest
+  let meta = []
   let output = ""
   let buffer = fs.readFileSync(info.source)
+  try {
+    let inMime = "image/jpeg"
+    if (path.extname(info.source) === ".png") inMime = "image/png"
+    meta = imagesMeta.readMeta(buffer, inMime)
+    for (let i = 0; i < meta.length; i++) {
+      if (typeof meta[i].value !== "string") meta[i].value = ""
+      meta[i].value = meta[i].value.replaceAll("UNICODE", "").replaceAll(/\u0000/g, "")
+    }
+  } catch {}
   try {
     const sourceExt = path.extname(info.source).replaceAll(".", "")
     const ext = path.extname(dest).replaceAll(".", "")
@@ -729,6 +739,12 @@ const compress = async (info: any) => {
       fs.renameSync(info.source, dest)
     }
     output = dest
+    if (meta?.length) {
+      let outMime = "image/jpeg"
+      if (path.extname(output) === ".png") outMime = "image/png"
+      let metaBuffer = imagesMeta.writeMeta(fs.readFileSync(output), outMime, meta, "buffer")
+      fs.writeFileSync(output, metaBuffer)
+    }
     window?.webContents.send("conversion-finished", {id: info.id, output, buffer, fileSize: Buffer.byteLength(buffer)})
     return nextQueue(info)
   } catch (error) {
@@ -995,7 +1011,7 @@ if (!singleLock) {
   })
 
   app.on("ready", () => {
-    window = new BrowserWindow({width: 800, height: 600, minWidth: 720, minHeight: 450, frame: false, backgroundColor: "#e14952", center: true, webPreferences: {nodeIntegration: true, contextIsolation: false, enableRemoteModule: true}})
+    window = new BrowserWindow({width: 800, height: 600, minWidth: 720, minHeight: 450, frame: false, backgroundColor: "#e14952", center: true, webPreferences: {nodeIntegration: true, contextIsolation: false}})
     window.loadFile(path.join(__dirname, "index.html"))
     window.removeMenu()
     require("@electron/remote/main").enable(window.webContents)

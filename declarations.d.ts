@@ -15,6 +15,7 @@ declare module "ass-to-vtt"
 declare module "ass-to-srt"
 declare module "imagemin-pngquant"
 declare module "@react-pdf/pdfkit"
+declare module "images-meta"
 
 type OpenImageProps = {
     label: string
