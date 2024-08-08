@@ -29,10 +29,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Tenpi/Image-Compressor"
+    "url": "https://github.com/Moebits/Image-Compressor"
   },
   "build": {
-    "appId": "com.tenpi.image-compressor",
+    "appId": "com.moebits.image-compressor",
     "productName": "Image Compressor",
     "icon": "./assets/icon.png",
     "directories": {
@@ -124,14 +124,13 @@
     "publish": {
       "provider": "github",
       "repo": "Image-Compressor",
-      "owner": "Tenpi",
+      "owner": "Moebits",
       "releaseType": "draft"
     }
   },
-  "author": "Tenpi",
+  "author": "Moebits",
   "license": "MIT",
   "devDependencies": {
-    "@tenpi/tslint": "^1.1.0",
     "@types/gif-encoder": "^0.7.1",
     "@types/imagemin": "^8.0.0",
     "@types/imagemin-gifsicle": "^7.0.1",
