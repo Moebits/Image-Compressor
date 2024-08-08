@@ -53,7 +53,7 @@ attempts to prevent naming conflicts by renaming files if the name would conflic
 
 ### Installation
 
-Download the installer from the [releases](https://github.com/Tenpi/Image-Compressor/releases) tab.
+Download the installer from the [releases](https://github.com/Moebits/Image-Compressor/releases) tab.
 
 ### MacOS
 
@@ -68,6 +68,6 @@ Open an issue on my GitHub repository.
 
 ### Also See
 
-- [Waifu2x GUI](https://github.com/Tenpi/Waifu2x-GUI) for upscaling images
-- [Pixiv Downloader](https://github.com/Tenpi/Pixiv-Downloader) for downloading images
-- [Photo Viewer](https://github.com/Tenpi/Photo-Viewer) for editing images
+- [Waifu2x GUI](https://github.com/Moebits/Waifu2x-GUI) for upscaling images
+- [Pixiv Downloader](https://github.com/Moebits/Pixiv-Downloader) for downloading images
+- [Photo Viewer](https://github.com/Moebits/Photo-Viewer) for editing images
