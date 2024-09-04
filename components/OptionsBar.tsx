@@ -4,7 +4,8 @@ import React, {useContext, useEffect, useState} from "react"
 import {Dropdown, DropdownButton} from "react-bootstrap"
 import folderButton from "../assets/icons/folder.png"
 import folderButtonHover from "../assets/icons/folder-hover.png"
-import {DirectoryContext, QualityContext, OverwriteContext, IgnoreBelowContext, ResizeWidthContext, ResizeHeightContext, PercentageContext, KeepRatioContext, RenameContext, FormatContext} from "../renderer"
+import {DirectoryContext, QualityContext, OverwriteContext, IgnoreBelowContext, ResizeWidthContext, 
+ResizeHeightContext, PercentageContext, KeepRatioContext, RenameContext, FormatContext, ProgressiveContext} from "../renderer"
 import Slider from "rc-slider"
 import functions from "../structures/functions"
 import "../styles/optionsbar.less"
@@ -20,6 +21,7 @@ const OptionsBar: React.FunctionComponent = (props) => {
     const {rename, setRename} = useContext(RenameContext)
     const {format, setFormat} = useContext(FormatContext)
     const {directory, setDirectory} = useContext(DirectoryContext)
+    const {progressive, setProgressive} = useContext(ProgressiveContext)
     const [folderHover, setFolderHover] = useState(false)
     const [id, setID] = useState(1)
 
@@ -41,7 +43,8 @@ const OptionsBar: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        ipcRenderer.invoke("store-settings", {quality, directory, overwrite, ignoreBelow, resizeWidth, resizeHeight, percentage, keepRatio, rename, format})
+        ipcRenderer.invoke("store-settings", {quality, directory, overwrite, ignoreBelow, resizeWidth, resizeHeight, 
+        percentage, keepRatio, rename, format, progressive})
         ipcRenderer.on("on-drop", onDrop)
         return () => {
             ipcRenderer.removeListener("on-drop", onDrop)
@@ -60,6 +63,7 @@ const OptionsBar: React.FunctionComponent = (props) => {
             setKeepRatio(settings.keepRatio)
             setRename(settings.rename)
             setFormat(settings.format)
+            setProgressive(settings.progressive)
         }
     }
     
@@ -181,7 +185,14 @@ const OptionsBar: React.FunctionComponent = (props) => {
                         <Dropdown.Item active={format === "png"} onClick={() => setFormat("png")}>png</Dropdown.Item>
                         <Dropdown.Item active={format === "jpg"} onClick={() => setFormat("jpg")}>jpg</Dropdown.Item>
                         <Dropdown.Item active={format === "gif"} onClick={() => setFormat("gif")}>gif</Dropdown.Item>
+                        <Dropdown.Item active={format === "webp"} onClick={() => setFormat("webp")}>webp</Dropdown.Item>
+                        <Dropdown.Item active={format === "avif"} onClick={() => setFormat("avif")}>avif</Dropdown.Item>
+                        <Dropdown.Item active={format === "jxl"} onClick={() => setFormat("jxl")}>jxl</Dropdown.Item>
                     </DropdownButton>
+                </div>
+                <div className="options-bar-box">
+                    <input className="options-bar-checkbox" type="checkbox" checked={progressive} onChange={() => setProgressive((prev: boolean) => !prev)}/>
+                    <p className="options-bar-text pointer" onClick={() => setProgressive((prev: boolean) => !prev)}>Progressive</p>
                 </div>
             </div>
         </section>

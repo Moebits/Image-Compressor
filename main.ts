@@ -658,7 +658,8 @@ const compress = async (info: any) => {
     percentage: info.percentage,
     keepRatio: info.keepRatio,
     rename: info.rename,
-    format: info.format
+    format: info.format,
+    progressive: info.progressive
   }
   window?.webContents.send("conversion-started", {id: info.id})
   const fileSize = functions.parseFileSize(info.fileSize)
@@ -692,15 +693,19 @@ const compress = async (info: any) => {
     const resizeCondition = options.keepRatio ? (options.percentage ? options.resizeWidth !== 100 : true) : (options.percentage ? (options.resizeWidth !== 100 && options.resizeHeight !== 100) : true)
     if (ext === "gif") {
       if (resizeCondition) {
-        const {frameArray, delayArray} = await functions.getGIFFrames(info.source)
-        const newFrameArray = [] as Buffer[]
-        for (let i = 0; i < frameArray.length; i++) {
-          const newFrame = await sharp(frameArray[i])
-          .resize(width, height, {fit: "fill"})
-          .toBuffer()
-          newFrameArray.push(newFrame)
+        if (process.platform === "win32") {
+          const {frameArray, delayArray} = await functions.getGIFFrames(info.source)
+          const newFrameArray = [] as Buffer[]
+          for (let i = 0; i < frameArray.length; i++) {
+            const newFrame = await sharp(frameArray[i])
+            .resize(width, height, {fit: "fill"})
+            .toBuffer()
+            newFrameArray.push(newFrame)
+          }
+          buffer = await functions.encodeGIF(newFrameArray, delayArray, width, height)
+        } else {
+          buffer = await sharp(buffer, {animated: true}).resize(width, height, {fit: "fill"}).gif().toBuffer()
         }
-        buffer = await functions.encodeGIF(newFrameArray, delayArray, width, height)
         if (options.quality !== 100) {
           buffer = await imagemin.buffer(buffer, {plugins: [
             imageminGifsicle({optimizationLevel: 3})
@@ -719,9 +724,11 @@ const compress = async (info: any) => {
       }
       if (sourceExt !== ext) {
         let s = sharp(buffer, {animated: true})
-        if (ext === "jpg" || ext === "jpeg") s.jpeg()
-        if (ext === "png") s.png()
-        if (ext === "webp") s.webp()
+        if (ext === "jpg" || ext === "jpeg") s.jpeg({optimiseScans: options.progressive, quality: options.quality})
+        if (ext === "png") s.png({quality: options.quality})
+        if (ext === "webp") s.webp({quality: options.quality})
+        if (ext === "avif") s.avif({quality: options.quality})
+        if (ext === "jxl") s.jxl({quality: options.quality})
         if (ext === "gif") s.gif()
         buffer = await s.toBuffer()
       }
@@ -781,7 +788,8 @@ ipcMain.handle("compress-realtime", async (event, info: any) => {
     percentage: info.percentage,
     keepRatio: info.keepRatio,
     rename: info.rename,
-    format: info.format
+    format: info.format,
+    progressive: info.progressive
   }
   const fileSize = functions.parseFileSize(info.fileSize)
   const ignoredSize = functions.parseFileSize(options.ignoreBelow)
@@ -797,15 +805,19 @@ ipcMain.handle("compress-realtime", async (event, info: any) => {
     const resizeCondition = options.keepRatio ? (options.percentage ? options.resizeWidth !== 100 : true) : (options.percentage ? (options.resizeWidth !== 100 && options.resizeHeight !== 100) : true)
     if (ext === "gif") {
       if (resizeCondition) {
-        const {frameArray, delayArray} = await functions.getGIFFrames(info.source)
-        const newFrameArray = [] as Buffer[]
-        for (let i = 0; i < frameArray.length; i++) {
-          const newFrame = await sharp(frameArray[i])
-          .resize(width, height, {fit: "fill"})
-          .toBuffer()
-          newFrameArray.push(newFrame)
+        if (process.platform === "win32") {
+          const {frameArray, delayArray} = await functions.getGIFFrames(info.source)
+          const newFrameArray = [] as Buffer[]
+          for (let i = 0; i < frameArray.length; i++) {
+            const newFrame = await sharp(frameArray[i])
+            .resize(width, height, {fit: "fill"})
+            .toBuffer()
+            newFrameArray.push(newFrame)
+          }
+          buffer = await functions.encodeGIF(newFrameArray, delayArray, width, height)
+        } else {
+          buffer = await sharp(buffer, {animated: true}).resize(width, height, {fit: "fill"}).gif().toBuffer()
         }
-        buffer = await functions.encodeGIF(newFrameArray, delayArray, width, height)
         if (options.quality !== 100) {
           buffer = await imagemin.buffer(buffer, {plugins: [
             imageminGifsicle({optimizationLevel: 3})
@@ -824,9 +836,11 @@ ipcMain.handle("compress-realtime", async (event, info: any) => {
       }
       if (sourceExt !== ext) {
         let s = sharp(buffer, {animated: true})
-        if (ext === "jpg" || ext === "jpeg") s.jpeg()
-        if (ext === "png") s.png()
-        if (ext === "webp") s.webp()
+        if (ext === "jpg" || ext === "jpeg") s.jpeg({optimiseScans: options.progressive, quality: options.quality})
+        if (ext === "png") s.png({quality: options.quality})
+        if (ext === "webp") s.webp({quality: options.quality})
+        if (ext === "avif") s.avif({quality: options.quality})
+        if (ext === "jxl") s.jxl({quality: options.quality})
         if (ext === "gif") s.gif()
         buffer = await s.toBuffer()
       }
@@ -839,7 +853,6 @@ ipcMain.handle("compress-realtime", async (event, info: any) => {
         ]})
       }
     }
-    console.log(buffer)
     return {buffer, fileSize: Buffer.byteLength(buffer)}
   } catch (error) {
     console.log(error)
@@ -1011,7 +1024,7 @@ if (!singleLock) {
   })
 
   app.on("ready", () => {
-    window = new BrowserWindow({width: 800, height: 600, minWidth: 720, minHeight: 450, frame: false, backgroundColor: "#e14952", center: true, webPreferences: {nodeIntegration: true, contextIsolation: false}})
+    window = new BrowserWindow({roundedCorners: false, width: 800, height: 600, minWidth: 720, minHeight: 450, frame: false, backgroundColor: "#e14952", center: true, webPreferences: {nodeIntegration: true, contextIsolation: false}})
     window.loadFile(path.join(__dirname, "index.html"))
     window.removeMenu()
     require("@electron/remote/main").enable(window.webContents)

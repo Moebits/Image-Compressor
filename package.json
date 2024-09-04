@@ -1,6 +1,6 @@
 {
   "name": "image-compressor",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Compresses, resizes, and renames images.",
   "main": "dist/main.js",
   "scripts": {
@@ -8,14 +8,11 @@
     "clean": "del-cli ./dist",
     "build": "npm run clean ./build && webpack && npm run sharp:mac && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder -m -p never",
     "rebuild": "npm rebuild --runtime=electron --target=14.0.0 --disturl=https://atom.io/download/atom-shell --abi=83",
-    "release": "npm run release:win && npm run release:linux && npm run release:mac",
+    "release": "npm run release:mac && npm run release:win",
     "release:mac": "npm run clean ./build && webpack && npm run sharp:mac && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder -m -p always",
     "release:win": "npm run clean ./build && webpack && npm run sharp:win && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder -w -p always",
-    "release:linux": "npm run clean ./build && webpack && npm run sharp:linux && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder -l -p always",
     "sharp:mac": "del-cli ./node_modules/sharp && npm install --platform=darwin --arch=arm64 sharp",
-    "sharp:mac64": "del-cli ./node_modules/sharp && npm install --platform=darwin --arch=x64 sharp",
-    "sharp:win": "del-cli ./node_modules/sharp && npm install --platform=win32 --arch=x64 sharp",
-    "sharp:linux": "del-cli ./node_modules/sharp && npm install --platform=linux --arch=x64 sharp"
+    "sharp:win": "del-cli ./node_modules/sharp && npm install --platform=win32 --arch=x64 sharp"
   },
   "overrides": {
     "graceful-fs": "^4.2.11"
@@ -49,23 +46,11 @@
       "extraFiles": [
         "poppler/mac/**"
       ],
-      "extraResources": [
-        {
-          "from": "vendor/cjpeg.app",
-          "to": "app/vendor/cjpeg"
-        },
-        {
-          "from": "vendor/cwebp.app",
-          "to": "app/vendor/cwebp"
-        },
-        {
-          "from": "vendor/gifsicle.app",
-          "to": "app/vendor/gifsicle"
-        },
-        {
-          "from": "vendor/pngquant.app",
-          "to": "app/vendor/pngquant"
-        }
+      "files": [
+        "vendor/cjpeg",
+        "vendor/cwebp",
+        "vendor/gifsicle",
+        "vendor/pngquant"
       ]
     },
     "dmg": {
@@ -99,19 +84,6 @@
       "createDesktopShortcut": "always",
       "installerSidebar": "./assets/installer.bmp",
       "uninstallerSidebar": "./assets/installer.bmp"
-    },
-    "linux": {
-      "target": {
-        "target": "appImage",
-        "arch": "x64"
-      },
-      "category": "Utility",
-      "files": [
-        "vendor/cjpeg",
-        "vendor/cwebp",
-        "vendor/gifsicle",
-        "vendor/pngquant"
-      ]
     },
     "files": [
       "dist/**/*",
@@ -154,6 +126,8 @@
     "less": "^4.1.0",
     "less-loader": "^7.3.0",
     "mini-css-extract-plugin": "^1.3.5",
+    "node-addon-api": "^8.1.0",
+    "node-gyp": "^10.2.0",
     "node-loader": "^1.0.2",
     "raw-loader": "^4.0.2",
     "terser-webpack-plugin": "^5.1.1",
@@ -196,7 +170,7 @@
     "react-zoom-pan-pinch": "^3.4.0",
     "sagiri": "^3.1.1",
     "shade-blend-color": "^1.0.0",
-    "sharp": "^0.33.2",
+    "sharp": "^0.33.5",
     "sharp-phash": "^2.0.0",
     "spawn-sync": "^2.0.0",
     "srt-to-vtt": "^1.1.3"

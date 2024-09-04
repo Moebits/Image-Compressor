@@ -22,6 +22,7 @@ export const PercentageContext = React.createContext<any>(null)
 export const KeepRatioContext = React.createContext<any>(null)
 export const RenameContext = React.createContext<any>(null)
 export const FormatContext = React.createContext<any>(null)
+export const ProgressiveContext = React.createContext<any>(null)
 
 const App = () => {
   const [directory, setDirectory] = useState("")
@@ -33,6 +34,7 @@ const App = () => {
   const [resizeHeight, setResizeHeight] = useState(100)
   const [percentage, setPercentage] = useState(true)
   const [keepRatio, setKeepRatio] = useState(true)
+  const [progressive, setProgressive] = useState(true)
   const [rename, setRename] = useState("{name}")
   const [format, setFormat] = useState("original")
 
@@ -52,6 +54,7 @@ const App = () => {
 
   return (
     <main className="app" {...getRootProps()}>
+      <ProgressiveContext.Provider value={{progressive, setProgressive}}>
       <DirectoryContext.Provider value={{directory, setDirectory}}>
       <ClearAllContext.Provider value={{clearAll, setClearAll}}>
       <FormatContext.Provider value={{format, setFormat}}>
@@ -80,6 +83,7 @@ const App = () => {
       </FormatContext.Provider>
       </ClearAllContext.Provider>
       </DirectoryContext.Provider>
+      </ProgressiveContext.Provider>
     </main>
   )
 }

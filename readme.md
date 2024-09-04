@@ -5,7 +5,7 @@
 This is a bulk image compressor, resizer, and renamer. Great for organizing your anime art collection. You can reduce the size of images/GIFs, delete duplicate images, and rename pictures according to the source (from saucenao).
 
 ### Features:
-- Compress and resize images (PNG/JPG/WEBP) and GIFs
+- Compress and resize images (PNG/JPG/WEBP/AVIF/JXL) and GIFs/Animated WebPs
 - Rename pictures according to the source from saucenao (original title, artist, pixiv ID, etc.)
 - Delete duplicate images (the one with the greatest dimensions is retained)
 - Flatten a folder (move all files in sub-folders to the parent and delete sub-folders)
@@ -14,8 +14,6 @@ This is a bulk image compressor, resizer, and renamer. Great for organizing your
 - Choose to overwrite images or write to a folder
 - Ignore images under a certain file size (to avoid over-compression)
 - Preview before and after images (right click on the thumbnails)
-
-Note: Quality only affects JPG/WEBP export, PNG and GIF compression are automatic.
 
 ### Rename Template:
 You can customize the output names. If it results in a blank name (eg. not found) it will default to using the same name as the input. If the "Overwrite" option is on, the original file is overwritten with the compressed file first and then renamed after. These are all the special replacements:
