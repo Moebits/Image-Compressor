@@ -294,4 +294,13 @@ export default class Functions {
         }
         return newLines.join("\n")
       }
+
+    public static isAnimatedWebp = (buffer: Buffer) => {
+        let str = buffer.toString("utf-8")
+        if (str.includes("ANMF")) {
+            return true
+        } else {
+            return false
+        }
+    }
 }

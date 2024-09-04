@@ -691,6 +691,10 @@ const compress = async (info: any) => {
     const sourceExt = path.extname(info.source).replaceAll(".", "")
     const ext = path.extname(dest).replaceAll(".", "")
     const resizeCondition = options.keepRatio ? (options.percentage ? options.resizeWidth !== 100 : true) : (options.percentage ? (options.resizeWidth !== 100 && options.resizeHeight !== 100) : true)
+    let isAnimated = sourceExt === "gif"
+    if (sourceExt === "webp") {
+      isAnimated = functions.isAnimatedWebp(buffer)
+    }
     if (ext === "gif") {
       if (resizeCondition) {
         if (process.platform === "win32") {
@@ -733,12 +737,14 @@ const compress = async (info: any) => {
         buffer = await s.toBuffer()
       }
       if (options.quality !== 100) {
-        buffer = await imagemin.buffer(buffer, {plugins: [
-          imageminMozjpeg({quality: options.quality}),
-          imageminPngquant(),
-          imageminWebp({quality: options.quality}),
-          imageminGifsicle({optimizationLevel: 3})
-        ]})
+        if (!isAnimated && ext !== "avif" && ext !== "jxl") {
+          buffer = await imagemin.buffer(buffer, {plugins: [
+            imageminMozjpeg({quality: options.quality}),
+            imageminPngquant(),
+            imageminWebp({quality: options.quality}),
+            imageminGifsicle({optimizationLevel: 3})
+          ]})
+        }
       }
     }
     fs.writeFileSync(options.overwrite ? info.source : dest, buffer)
@@ -803,6 +809,10 @@ ipcMain.handle("compress-realtime", async (event, info: any) => {
     const sourceExt = path.extname(info.source).replaceAll(".", "")
     const ext = path.extname(dest).replaceAll(".", "")
     const resizeCondition = options.keepRatio ? (options.percentage ? options.resizeWidth !== 100 : true) : (options.percentage ? (options.resizeWidth !== 100 && options.resizeHeight !== 100) : true)
+    let isAnimated = sourceExt === "gif"
+    if (sourceExt === "webp") {
+      isAnimated = functions.isAnimatedWebp(buffer)
+    }
     if (ext === "gif") {
       if (resizeCondition) {
         if (process.platform === "win32") {
@@ -845,12 +855,14 @@ ipcMain.handle("compress-realtime", async (event, info: any) => {
         buffer = await s.toBuffer()
       }
       if (options.quality !== 100) {
-        buffer = await imagemin.buffer(buffer, {plugins: [
-          imageminMozjpeg({quality: options.quality}),
-          imageminPngquant(),
-          imageminWebp({quality: options.quality}),
-          imageminGifsicle({optimizationLevel: 3})
-        ]})
+        if (!isAnimated && ext !== "avif" && ext !== "jxl") {
+          buffer = await imagemin.buffer(buffer, {plugins: [
+            imageminMozjpeg({quality: options.quality}),
+            imageminPngquant(),
+            imageminWebp({quality: options.quality}),
+            imageminGifsicle({optimizationLevel: 3})
+          ]})
+        }
       }
     }
     return {buffer, fileSize: Buffer.byteLength(buffer)}
