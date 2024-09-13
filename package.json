@@ -1,12 +1,12 @@
 {
   "name": "image-compressor",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Compresses, resizes, and renames images.",
   "main": "dist/main.js",
   "scripts": {
     "start": "npm run clean && webpack && cross-env DEVELOPMENT=true electron dist/main.js",
     "clean": "del-cli ./dist",
-    "build": "npm run clean ./build && webpack && npm run sharp:mac && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder -m -p never",
+    "build": "npm run clean ./build && webpack && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder -m -p never",
     "rebuild": "npm rebuild --runtime=electron --target=14.0.0 --disturl=https://atom.io/download/atom-shell --abi=83",
     "release": "npm run release:mac && npm run release:win",
     "release:mac": "npm run clean ./build && webpack && npm run sharp:mac && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder -m -p always",
@@ -46,11 +46,23 @@
       "extraFiles": [
         "poppler/mac/**"
       ],
-      "files": [
-        "vendor/cjpeg",
-        "vendor/cwebp",
-        "vendor/gifsicle",
-        "vendor/pngquant"
+      "extraResources": [
+        {
+          "from": "vendor/cjpeg",
+          "to": "app/vendor/cjpeg"
+        },
+        {
+          "from": "vendor/cwebp",
+          "to": "app/vendor/cwebp"
+        },
+        {
+          "from": "vendor/gifsicle",
+          "to": "app/vendor/gifsicle"
+        },
+        {
+          "from": "vendor/pngquant",
+          "to": "app/vendor/pngquant"
+        }
       ]
     },
     "dmg": {

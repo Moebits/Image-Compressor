@@ -55,7 +55,7 @@ const removeDoubles = async (images: string[], dontProcessAll?: boolean) => {
   let widthMap = {} as any 
 
   for (let i = 0; i < images.length; i++) {
-    const metadata = await sharp(images[i]).metadata()
+    const metadata = await sharp(images[i], {limitInputPixels: false}).metadata()
     const width = metadata.width || 0
     if (widthMap[width]) {
       widthMap[width] += 1
@@ -76,7 +76,7 @@ const removeDoubles = async (images: string[], dontProcessAll?: boolean) => {
   }
 
   for (let i = 0; i < images.length; i++) {
-    const metadata = await sharp(images[i]).metadata()
+    const metadata = await sharp(images[i], {limitInputPixels: false}).metadata()
     const width = metadata.width || 0
     if (width > commonWidth * 1.5) {
       doubleImages.push(images[i])
@@ -89,16 +89,16 @@ const removeDoubles = async (images: string[], dontProcessAll?: boolean) => {
   }
 
   for (let i = 0; i < doubleImages.length; i++) {
-    const metadata = await sharp(doubleImages[i]).metadata()
+    const metadata = await sharp(doubleImages[i], {limitInputPixels: false}).metadata()
     const width = metadata.width || 0
     const height = metadata.height || 0
     const newWidth = Math.floor(width / 2)
     const page1 = `${path.dirname(doubleImages[i])}/${path.basename(doubleImages[i], path.extname(doubleImages[i]))}.1${path.extname(doubleImages[i])}`
     const page2 = `${path.dirname(doubleImages[i])}/${path.basename(doubleImages[i], path.extname(doubleImages[i]))}.2${path.extname(doubleImages[i])}`
-    await sharp(doubleImages[i])
+    await sharp(doubleImages[i], {limitInputPixels: false})
         .extract({left: newWidth, top: 0, width: newWidth, height: height})
         .toFile(page1)
-    await sharp(doubleImages[i])
+    await sharp(doubleImages[i], {limitInputPixels: false})
         .extract({left: 0, top: 0, width: newWidth, height: height})
         .toFile(page2)
   }
@@ -701,14 +701,14 @@ const compress = async (info: any) => {
           const {frameArray, delayArray} = await functions.getGIFFrames(info.source)
           const newFrameArray = [] as Buffer[]
           for (let i = 0; i < frameArray.length; i++) {
-            const newFrame = await sharp(frameArray[i])
+            const newFrame = await sharp(frameArray[i], {limitInputPixels: false})
             .resize(width, height, {fit: "fill"})
             .toBuffer()
             newFrameArray.push(newFrame)
           }
           buffer = await functions.encodeGIF(newFrameArray, delayArray, width, height)
         } else {
-          buffer = await sharp(buffer, {animated: true}).resize(width, height, {fit: "fill"}).gif().toBuffer()
+          buffer = await sharp(buffer, {animated: true, limitInputPixels: false}).resize(width, height, {fit: "fill"}).gif().toBuffer()
         }
         if (options.quality !== 100) {
           buffer = await imagemin.buffer(buffer, {plugins: [
@@ -724,10 +724,10 @@ const compress = async (info: any) => {
       }
     } else {
       if (resizeCondition) {
-        buffer = await sharp(buffer, {animated: true}).resize(width, height, {fit: "fill"}).toBuffer()
+        buffer = await sharp(buffer, {animated: true, limitInputPixels: false}).resize(width, height, {fit: "fill"}).toBuffer()
       }
       if (sourceExt !== ext) {
-        let s = sharp(buffer, {animated: true})
+        let s = sharp(buffer, {animated: true, limitInputPixels: false})
         if (ext === "jpg" || ext === "jpeg") s.jpeg({optimiseScans: options.progressive, quality: options.quality})
         if (ext === "png") s.png({quality: options.quality})
         if (ext === "webp") s.webp({quality: options.quality})
@@ -819,14 +819,14 @@ ipcMain.handle("compress-realtime", async (event, info: any) => {
           const {frameArray, delayArray} = await functions.getGIFFrames(info.source)
           const newFrameArray = [] as Buffer[]
           for (let i = 0; i < frameArray.length; i++) {
-            const newFrame = await sharp(frameArray[i])
+            const newFrame = await sharp(frameArray[i], {limitInputPixels: false})
             .resize(width, height, {fit: "fill"})
             .toBuffer()
             newFrameArray.push(newFrame)
           }
           buffer = await functions.encodeGIF(newFrameArray, delayArray, width, height)
         } else {
-          buffer = await sharp(buffer, {animated: true}).resize(width, height, {fit: "fill"}).gif().toBuffer()
+          buffer = await sharp(buffer, {animated: true, limitInputPixels: false}).resize(width, height, {fit: "fill"}).gif().toBuffer()
         }
         if (options.quality !== 100) {
           buffer = await imagemin.buffer(buffer, {plugins: [
@@ -842,10 +842,10 @@ ipcMain.handle("compress-realtime", async (event, info: any) => {
       }
     } else {
       if (resizeCondition) {
-        buffer = await sharp(buffer, {animated: true}).resize(width, height, {fit: "fill"}).toBuffer()
+        buffer = await sharp(buffer, {animated: true, limitInputPixels: false}).resize(width, height, {fit: "fill"}).toBuffer()
       }
       if (sourceExt !== ext) {
-        let s = sharp(buffer, {animated: true})
+        let s = sharp(buffer, {animated: true, limitInputPixels: false})
         if (ext === "jpg" || ext === "jpeg") s.jpeg({optimiseScans: options.progressive, quality: options.quality})
         if (ext === "png") s.png({quality: options.quality})
         if (ext === "webp") s.webp({quality: options.quality})
