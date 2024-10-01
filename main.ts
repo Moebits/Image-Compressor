@@ -726,17 +726,15 @@ const compress = async (info: any) => {
       if (resizeCondition) {
         buffer = await sharp(buffer, {animated: true, limitInputPixels: false}).resize(width, height, {fit: "fill"}).toBuffer()
       }
-      if (sourceExt !== ext) {
-        let s = sharp(buffer, {animated: true, limitInputPixels: false})
-        if (ext === "jpg" || ext === "jpeg") s.jpeg({optimiseScans: options.progressive, quality: options.quality})
-        if (ext === "png") s.png({quality: options.quality})
-        if (ext === "webp") s.webp({quality: options.quality})
-        if (ext === "avif") s.avif({quality: options.quality})
-        if (ext === "jxl") s.jxl({quality: options.quality})
-        if (ext === "gif") s.gif()
-        buffer = await s.toBuffer()
-      }
-      if (options.quality !== 100) {
+      let s = sharp(buffer, {animated: true, limitInputPixels: false})
+      if (ext === "jpg" || ext === "jpeg") s.jpeg({optimiseScans: options.progressive, quality: options.quality, trellisQuantisation: true})
+      if (ext === "png") s.png({quality: options.quality})
+      if (ext === "webp") s.webp({quality: options.quality})
+      if (ext === "avif") s.avif({quality: options.quality})
+      if (ext === "jxl") s.jxl({quality: options.quality})
+      if (ext === "gif") s.gif()
+      buffer = await s.toBuffer()
+      if (options.quality < 95) {
         if (!isAnimated && ext !== "avif" && ext !== "jxl") {
           buffer = await imagemin.buffer(buffer, {plugins: [
             imageminMozjpeg({quality: options.quality}),
@@ -844,17 +842,15 @@ ipcMain.handle("compress-realtime", async (event, info: any) => {
       if (resizeCondition) {
         buffer = await sharp(buffer, {animated: true, limitInputPixels: false}).resize(width, height, {fit: "fill"}).toBuffer()
       }
-      if (sourceExt !== ext) {
-        let s = sharp(buffer, {animated: true, limitInputPixels: false})
-        if (ext === "jpg" || ext === "jpeg") s.jpeg({optimiseScans: options.progressive, quality: options.quality})
-        if (ext === "png") s.png({quality: options.quality})
-        if (ext === "webp") s.webp({quality: options.quality})
-        if (ext === "avif") s.avif({quality: options.quality})
-        if (ext === "jxl") s.jxl({quality: options.quality})
-        if (ext === "gif") s.gif()
-        buffer = await s.toBuffer()
-      }
-      if (options.quality !== 100) {
+      let s = sharp(buffer, {animated: true, limitInputPixels: false})
+      if (ext === "jpg" || ext === "jpeg") s.jpeg({optimiseScans: options.progressive, quality: options.quality})
+      if (ext === "png") s.png({quality: options.quality})
+      if (ext === "webp") s.webp({quality: options.quality})
+      if (ext === "avif") s.avif({quality: options.quality})
+      if (ext === "jxl") s.jxl({quality: options.quality})
+      if (ext === "gif") s.gif()
+      buffer = await s.toBuffer()
+      if (options.quality < 95) {
         if (!isAnimated && ext !== "avif" && ext !== "jxl") {
           buffer = await imagemin.buffer(buffer, {plugins: [
             imageminMozjpeg({quality: options.quality}),
