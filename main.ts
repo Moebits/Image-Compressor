@@ -25,6 +25,7 @@ import child_process from "child_process"
 import mkvExtractor from "mkv-subtitle-extractor"
 import srt2vtt from "srt-to-vtt"
 import ass2srt from "ass-to-srt"
+import {ID3Writer} from "browser-id3-writer"
 
 import util from "util"
 
@@ -47,6 +48,29 @@ const store = new Store()
 const history: Array<{id: number, source: string, dest?: string}> = []
 const active: Array<{id: number, source: string, dest: string, action: null | "stop"}> = []
 const queue: Array<{started: boolean, info: any}> = []
+
+ipcMain.handle("song-cover", async (event, files: string[]) => {
+  const MP3s = files.filter((f) => path.extname(f) === ".mp3")
+  const images = files.filter((f) => path.extname(f).toLowerCase() === ".jpg" 
+  || path.extname(f).toLowerCase() === ".jpeg"
+  || path.extname(f).toLowerCase() === ".png" 
+  || path.extname(f).toLowerCase() === ".webp")
+
+  for (let i = 0; i < MP3s.length; i++) {
+    if (!images[i]) break
+    const songBuffer = fs.readFileSync(MP3s[i])
+    const imageBuffer = fs.readFileSync(images[i])
+
+    const writer = new ID3Writer(songBuffer.buffer)
+    .setFrame("APIC" as any, {type: 3, data: imageBuffer, description: "Song Cover", useUnicodeEncoding: false} as any)
+    writer.addTag()
+
+    const arrayBuffer = await writer.getBlob().arrayBuffer()
+    fs.writeFileSync(MP3s[i], Buffer.from(arrayBuffer))
+  }
+
+  shell.showItemInFolder(MP3s[0])
+})
 
 const removeDoubles = async (images: string[], dontProcessAll?: boolean) => {
   images = images.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
@@ -325,7 +349,7 @@ const createPDF = async (dir: string, images: string[]) => {
 ipcMain.handle("pdf-cover", async (event, files: string[]) => {
   const directories = files.filter((f) => fs.lstatSync(f).isDirectory())
   const PDFs = files.filter((f) => path.extname(f) === ".pdf")
-  const images = files.filter((f) => path.extname(f).toLowerCase() === ".jpg" || path.extname(f).toLowerCase() === ".png" || path.extname(f).toLowerCase() === ".jpeg")
+  const images = files.filter((f) => path.extname(f).toLowerCase() === ".jpg" || path.extname(f).toLowerCase() === ".jpeg" || path.extname(f).toLowerCase() === ".png")
 
   let openDir = ""
 
@@ -415,13 +439,14 @@ ipcMain.handle("multi-open", async (event, type?: string) => {
   let title = "Convert or Extract PDF"
   let button = "Convert"
   if (type === "cover") title = "PDF or Image Directory Cover"
+  if (type === "subs") title = "Convert to VTT Subtitles"
   if (type === "rename") {
     title = "Rename by Directory"
     button = "Rename"
   }
-  if (type === "subs") {
-    title = "Convert to VTT Subtitles"
-    button = "Convert"
+  if (type === "songcover") {
+    title = "Add MP3 Cover"
+    button = "Add"
   }
   if (!window) return
   const result = await dialog.showOpenDialog(window, {

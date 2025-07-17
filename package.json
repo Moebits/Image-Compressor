@@ -1,6 +1,6 @@
 {
   "name": "image-compressor",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Compresses, resizes, and renames images.",
   "main": "dist/main.js",
   "scripts": {
@@ -158,6 +158,7 @@
     "ass-to-vtt": "^1.2.0",
     "bing-translate-api": "^2.2.1",
     "bootstrap": "^4.6.0",
+    "browser-id3-writer": "^6.3.0",
     "electron-shortcuts": "^0.4.0",
     "electron-store": "^7.0.1",
     "electron-updater": "^4.3.5",

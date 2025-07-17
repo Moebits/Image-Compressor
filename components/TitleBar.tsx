@@ -27,6 +27,8 @@ import renameButton from "../assets/icons/rename.png"
 import renameButtonHover from "../assets/icons/rename-hover.png"
 import vttButton from "../assets/icons/vtt.png"
 import vttButtonHover from "../assets/icons/vtt-hover.png"
+import mp3Button from "../assets/icons/mp3.png"
+import mp3ButtonHover from "../assets/icons/mp3-hover.png"
 import "../styles/titlebar.less"
 
 const TitleBar: React.FunctionComponent = (props) => {
@@ -42,6 +44,7 @@ const TitleBar: React.FunctionComponent = (props) => {
     const [hoverCover, setHoverCover] = useState(false)
     const [hoverRename, setHoverRename] = useState(false)
     const [hoverVTT, setHoverVTT] = useState(false)
+    const [hoverMP3, setHoverMP3] = useState(false)
     const [theme, setTheme] = useState("light")
 
     useEffect(() => {
@@ -104,6 +107,11 @@ const TitleBar: React.FunctionComponent = (props) => {
         if (files?.[0]) ipcRenderer.invoke("extract-subtitles", files)
     }
 
+    const mp3 = async () => {
+        const files = await ipcRenderer.invoke("multi-open", "songcover")
+        if (files?.[0]) ipcRenderer.invoke("song-cover", files)
+    }
+
     const changeTheme = (value?: string) => {
         let condition = value !== undefined ? value === "dark" : theme === "light"
         if (condition) {
@@ -144,6 +152,7 @@ const TitleBar: React.FunctionComponent = (props) => {
                     </div>
                     <div className="title-bar-buttons">
                     <img src={hoverTheme ? (theme === "light" ? darkButtonHover : lightButtonHover) : (theme === "light" ? darkButton : lightButton)} height="20" width="20" className="title-bar-button theme-button" onClick={() => changeTheme()} onMouseEnter={() => setHoverTheme(true)} onMouseLeave={() => setHoverTheme(false)}/>
+                        <img src={hoverMP3 ? mp3ButtonHover : mp3Button} height="20" width="20" className="title-bar-button mkv-button" onClick={mp3} onMouseEnter={() => setHoverMP3(true)} onMouseLeave={() => setHoverMP3(false)}/>
                         <img src={hoverVTT ? vttButtonHover : vttButton} height="20" width="20" className="title-bar-button mkv-button" onClick={vtt} onMouseEnter={() => setHoverVTT(true)} onMouseLeave={() => setHoverVTT(false)}/>
                         <img src={hoverRename ? renameButtonHover : renameButton} height="20" width="20" className="title-bar-button rename-button" onClick={rename} onMouseEnter={() => setHoverRename(true)} onMouseLeave={() => setHoverRename(false)}/>
                         <img src={hoverCover ? coverButtonHover : coverButton} height="20" width="20" className="title-bar-button cover-button" onClick={cover} onMouseEnter={() => setHoverCover(true)} onMouseLeave={() => setHoverCover(false)}/>
